@@ -1,0 +1,106 @@
+﻿@model Gmt_Asset_Tracker.Models.Asset
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Create</h1>
+
+<h4>Asset</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Asset_name" class="control-label"></label>
+                <input asp-for="Asset_name" class="form-control" />
+                <span asp-validation-for="Asset_name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Asset_description" class="control-label"></label>
+                <input asp-for="Asset_description" class="form-control" />
+                <span asp-validation-for="Asset_description" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="CategoryId" class="control-label"></label>
+                <select asp-for="CategoryId" class ="form-control" asp-items="ViewBag.CategoryId"></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="LocationId" class="control-label"></label>
+                <select asp-for="LocationId" class ="form-control" asp-items="ViewBag.LocationId"></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="DepartmentId" class="control-label"></label>
+                <select asp-for="DepartmentId" class ="form-control" asp-items="ViewBag.DepartmentId"></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="AssetStateId" class="control-label"></label>
+                <select asp-for="AssetStateId" class ="form-control" asp-items="ViewBag.AssetStateId"></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="Asset_tag" class="control-label"></label>
+                <input asp-for="Asset_tag" class="form-control" />
+                <span asp-validation-for="Asset_tag" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Service_tag" class="control-label"></label>
+                <input asp-for="Service_tag" class="form-control" />
+                <span asp-validation-for="Service_tag" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Assigned_to" class="control-label"></label>
+                <input asp-for="Assigned_to" class="form-control" />
+                <span asp-validation-for="Assigned_to" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Purchased_price" class="control-label"></label>
+                <input asp-for="Purchased_price" class="form-control" />
+                <span asp-validation-for="Purchased_price" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="VendorId" class="control-label"></label>
+                <select asp-for="VendorId" class ="form-control" asp-items="ViewBag.VendorId"></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="Delivery_date" class="control-label"></label>
+                <input asp-for="Delivery_date" class="form-control" />
+                <span asp-validation-for="Delivery_date" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Requistion_pack" class="control-label"></label>
+                <input asp-for="Requistion_pack" class="form-control" />
+                <span asp-validation-for="Requistion_pack" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="CheckId" class="control-label"></label>
+                <select asp-for="CheckId" class ="form-control" asp-items="ViewBag.CheckId"></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="Image" class="control-label"></label>
+                <input asp-for="Image" class="form-control" />
+                <span asp-validation-for="Image" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="PresentLocationId" class="control-label"></label>
+                <select asp-for="PresentLocationId" class ="form-control" asp-items="ViewBag.PresentLocationId"></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="Present_user" class="control-label"></label>
+                <input asp-for="Present_user" class="form-control" />
+                <span asp-validation-for="Present_user" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

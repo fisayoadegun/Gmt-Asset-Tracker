@@ -1,0 +1,131 @@
+﻿@model IEnumerable<Gmt_Asset_Tracker.Models.Asset>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Asset_name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Asset_description)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Asset_tag)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Service_tag)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Assigned_to)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Purchased_price)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Delivery_date)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Requistion_pack)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Image)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Present_user)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Category)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Location)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Present_location)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Department)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Asset_State)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Vendor)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Physical_check)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Asset_name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Asset_description)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Asset_tag)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Service_tag)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Assigned_to)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Purchased_price)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Delivery_date)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Requistion_pack)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Image)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Present_user)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Category.Category_name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Location.Location_name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Present_location.Location_name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Department.Department_name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Asset_State.Asset_state)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Vendor.Vendor_name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Physical_check.Check_name)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
