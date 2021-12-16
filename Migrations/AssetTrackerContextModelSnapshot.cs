@@ -65,8 +65,8 @@ namespace Gmt_Asset_Tracker.Migrations
                     b.Property<string>("Present_user")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal>("Purchased_price")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<string>("Purchased_price")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Requistion_pack")
                         .HasColumnType("nvarchar(max)");

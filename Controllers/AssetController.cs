@@ -7,16 +7,21 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Gmt_Asset_Tracker.Data;
 using Gmt_Asset_Tracker.Models;
+using Microsoft.AspNetCore.Hosting;
+using System.IO;
+using Microsoft.AspNetCore.Http;
 
 namespace Gmt_Asset_Tracker.Controllers
 {
     public class AssetController : Controller
     {
         private readonly AssetTrackerContext _context;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public AssetController(AssetTrackerContext context)
+        public AssetController(AssetTrackerContext context, IWebHostEnvironment webHostEnvironment)
         {
             _context = context;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         // GET: Asset
@@ -63,16 +68,42 @@ namespace Gmt_Asset_Tracker.Controllers
             ViewData["VendorId"] = new SelectList(_context.Vendors, "Id", "Vendor_name");
             return View();
         }
-
+        
         // POST: Asset/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Asset_name,Asset_description,CategoryId,LocationId,DepartmentId,AssetStateId,Asset_tag,Service_tag,Assigned_to,Purchased_price,VendorId,Delivery_date,Requistion_pack,CheckId,Image,PresentLocationId,Present_user")] Asset asset)
+        public async Task<IActionResult> Create(int? id, [FromServices] IWebHostEnvironment hostingEnvironment, Asset asset)
         {
             if (ModelState.IsValid)
             {
+                string imageName = "noimage.png";
+                if (asset.ImageUpload != null)
+                {
+                    string folder = "media/images/";
+                    imageName = Guid.NewGuid().ToString() + "_" + asset.ImageUpload.FileName;
+                    string serverFolder = Path.Combine(_webHostEnvironment.WebRootPath, folder, imageName);
+
+                    await asset.ImageUpload.CopyToAsync(new FileStream(serverFolder, FileMode.Create));
+                }
+
+                string pdffile = "norequisitionpack.pdf";
+                if (asset.RequistionpackUpload != null)
+                {                    
+                  string fileName = $"{hostingEnvironment.WebRootPath}\\media\\pdfs\\{asset.RequistionpackUpload.FileName}";
+                   
+                  pdffile = asset.RequistionpackUpload.FileName;
+                    using (FileStream fileStream = System.IO.File.Create(fileName))
+                    {
+                       
+                        asset.RequistionpackUpload.CopyTo(fileStream);
+                        fileStream.Flush();
+                    }                    
+                }
+                asset.Requistion_pack = pdffile;
+                asset.Image = imageName;
+               
                 _context.Add(asset);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -115,31 +146,58 @@ namespace Gmt_Asset_Tracker.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Asset_name,Asset_description,CategoryId,LocationId,DepartmentId,AssetStateId,Asset_tag,Service_tag,Assigned_to,Purchased_price,VendorId,Delivery_date,Requistion_pack,CheckId,Image,PresentLocationId,Present_user")] Asset asset)
+        public async Task<IActionResult> Edit(int id, [FromServices] IWebHostEnvironment hostingEnvironment, Asset asset)
         {
             if (id != asset.Id)
             {
                 return NotFound();
             }
-
+            
             if (ModelState.IsValid)
             {
-                try
+                string imageName = "noimage.png";
+                if (asset.ImageUpload != null)
                 {
-                    _context.Update(asset);
-                    await _context.SaveChangesAsync();
+                    string uploadsDir = Path.Combine(_webHostEnvironment.WebRootPath, "media/images/");
+                    if (!string.Equals(asset.Image, "noimage.png"))
+                    {
+                        string oldImagePath = Path.Combine(uploadsDir, asset.Image);
+                        if (System.IO.File.Exists(oldImagePath))
+                        {
+                            System.IO.File.Delete(oldImagePath);
+                        }
+                    }
+                    imageName = Guid.NewGuid().ToString() + "_" + asset.ImageUpload.FileName;
+                    string filePath = Path.Combine(uploadsDir, imageName);
+                    FileStream fs = new FileStream(filePath, FileMode.Create);
+                    await asset.ImageUpload.CopyToAsync(fs);                                       
                 }
-                catch (DbUpdateConcurrencyException)
+                string pdffile = "norequisitionpack.pdf";
+                if (asset.RequistionpackUpload != null)
                 {
-                    if (!AssetExists(asset.Id))
+                    string fileName = $"{hostingEnvironment.WebRootPath}\\media\\pdfs\\{asset.RequistionpackUpload.FileName}";
+                    if (!string.Equals(asset.Requistion_pack, "norequisition.pdf"))
                     {
-                        return NotFound();
+                        string oldPdfPath = Path.Combine(fileName);
+                        if (System.IO.File.Exists(oldPdfPath))
+                        {
+                            System.IO.File.Delete(oldPdfPath);
+                        }
                     }
-                    else
+                    pdffile = asset.RequistionpackUpload.FileName;
+                    using (FileStream fileStream = System.IO.File.Create(fileName))
                     {
-                        throw;
+
+                        asset.RequistionpackUpload.CopyTo(fileStream);
+                        fileStream.Flush();
                     }
+                   
                 }
+                asset.Requistion_pack = pdffile;
+                asset.Image = imageName;
+                _context.Update(asset);
+                await _context.SaveChangesAsync();
+            
                 return RedirectToAction(nameof(Index));
             }
             ViewData["AssetStateId"] = new SelectList(_context.Asset_States, "Id", "Asset_state", asset.AssetStateId);
@@ -180,17 +238,51 @@ namespace Gmt_Asset_Tracker.Controllers
         // POST: Asset/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(int id, [FromServices] IWebHostEnvironment hostingEnvironment)
         {
-            var asset = await _context.Assets.FindAsync(id);
-            _context.Assets.Remove(asset);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
+            Asset asset = await _context.Assets.FindAsync(id);
+            if (asset == null)
+            {
+                TempData["Error"] = "The asset does not exist";
+            }
+            else
+            {
+                string uploadsDir = Path.Combine(_webHostEnvironment.WebRootPath, "media/images/");
+                if (!string.Equals(asset.Image, "noimage.png"))
+                {
+                    string oldImagePath = Path.Combine(uploadsDir, asset.Image);
+                    if (System.IO.File.Exists(oldImagePath))
+                    {
+                        System.IO.File.Delete(oldImagePath);
+                    }
+                }
 
+                string fileName = Path.Combine(_webHostEnvironment.WebRootPath, "media/pdfs/");
+                if (!string.Equals(asset.Requistion_pack, "norequisition.pdf"))
+                {
+                    string oldPdfPath = Path.Combine(fileName, asset.Requistion_pack);
+                    if (System.IO.File.Exists(oldPdfPath))
+                    {
+                        System.IO.File.Delete(oldPdfPath);
+                    }
+                }
+                _context.Assets.Remove(asset);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            return RedirectToAction(nameof(Index));           
+        }
         private bool AssetExists(int id)
         {
             return _context.Assets.Any(e => e.Id == id);
         }
+
+        public IActionResult PDFViewerNewTab(string fileName)
+        {
+            string path = _webHostEnvironment.WebRootPath + "\\media\\pdfs\\" + fileName;
+            return File(System.IO.File.ReadAllBytes(path), "application/pdf");
+        }
+
     }
+
 }

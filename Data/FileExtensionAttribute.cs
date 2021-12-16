@@ -34,7 +34,7 @@ namespace Gmt_Asset_Tracker.Data
 
         private string GetErrorMessage()
         {
-            return "Allowed extensions are jpg and png.";
+            return "Allowed extensions are jpg, png and pdf.";
         }
     }
 }

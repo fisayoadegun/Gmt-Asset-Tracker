@@ -10,7 +10,7 @@
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Create">
+        <form asp-action="Create" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="Asset_name" class="control-label"></label>
@@ -24,19 +24,27 @@
             </div>
             <div class="form-group">
                 <label asp-for="CategoryId" class="control-label"></label>
-                <select asp-for="CategoryId" class ="form-control" asp-items="ViewBag.CategoryId"></select>
+                <select asp-for="CategoryId" class="form-control" asp-items="ViewBag.CategoryId">
+                    <option value="0">Choose a category</option>
+                </select>
             </div>
             <div class="form-group">
                 <label asp-for="LocationId" class="control-label"></label>
-                <select asp-for="LocationId" class ="form-control" asp-items="ViewBag.LocationId"></select>
+                <select asp-for="LocationId" class="form-control" asp-items="ViewBag.LocationId">
+                    <option value="0">Choose a Location</option>
+                </select>
             </div>
             <div class="form-group">
                 <label asp-for="DepartmentId" class="control-label"></label>
-                <select asp-for="DepartmentId" class ="form-control" asp-items="ViewBag.DepartmentId"></select>
+                <select asp-for="DepartmentId" class="form-control" asp-items="ViewBag.DepartmentId">
+                    <option value="0">Choose a Department</option>
+                </select>
             </div>
             <div class="form-group">
                 <label asp-for="AssetStateId" class="control-label"></label>
-                <select asp-for="AssetStateId" class ="form-control" asp-items="ViewBag.AssetStateId"></select>
+                <select asp-for="AssetStateId" class="form-control" asp-items="ViewBag.AssetStateId">
+                    <option value="0">Choose Asset State</option>
+                </select>
             </div>
             <div class="form-group">
                 <label asp-for="Asset_tag" class="control-label"></label>
@@ -60,36 +68,44 @@
             </div>
             <div class="form-group">
                 <label asp-for="VendorId" class="control-label"></label>
-                <select asp-for="VendorId" class ="form-control" asp-items="ViewBag.VendorId"></select>
+                <select asp-for="VendorId" class="form-control" asp-items="ViewBag.VendorId">
+                    <option value="0">Choose a vendor</option>
+                </select>
             </div>
             <div class="form-group">
                 <label asp-for="Delivery_date" class="control-label"></label>
                 <input asp-for="Delivery_date" class="form-control" />
                 <span asp-validation-for="Delivery_date" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="Requistion_pack" class="control-label"></label>
-                <input asp-for="Requistion_pack" class="form-control" />
-                <span asp-validation-for="Requistion_pack" class="text-danger"></span>
-            </div>
+
             <div class="form-group">
                 <label asp-for="CheckId" class="control-label"></label>
-                <select asp-for="CheckId" class ="form-control" asp-items="ViewBag.CheckId"></select>
+                <select asp-for="CheckId" class="form-control" asp-items="ViewBag.CheckId">
+                    <option value="0">Physical check?</option>
+                </select>
             </div>
             <div class="form-group">
-                <label asp-for="Image" class="control-label"></label>
-                <input asp-for="Image" class="form-control" />
-                <span asp-validation-for="Image" class="text-danger"></span>
+                <label asp-for="Requistion_pack" class="control-label">Upload Requisition Pack</label>
+                <input asp-for="RequistionpackUpload" class="form-control" />                
+                <span asp-validation-for="RequistionpackUpload" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Image" class="control-label">Asset Image</label>
+                <input asp-for="ImageUpload" class="form-control" />
+                <img src="" id="imgpreview" class="pt-2" alt="" />
+                <span asp-validation-for="ImageUpload" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="PresentLocationId" class="control-label"></label>
-                <select asp-for="PresentLocationId" class ="form-control" asp-items="ViewBag.PresentLocationId"></select>
+                <select asp-for="PresentLocationId" class="form-control" asp-items="ViewBag.PresentLocationId">
+                    <option value="0">Choose a Location</option>
+                </select>
             </div>
-            <div class="form-group">
-                <label asp-for="Present_user" class="control-label"></label>
-                <input asp-for="Present_user" class="form-control" />
-                <span asp-validation-for="Present_user" class="text-danger"></span>
-            </div>
+            @*<div class="form-group">
+            <label asp-for="Present_user" class="control-label"></label>
+            <input asp-for="Present_user" class="form-control" />
+            <span asp-validation-for="Present_user" class="text-danger"></span>
+        </div>*@
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />
             </div>
@@ -101,6 +117,14 @@
     <a asp-action="Index">Back to List</a>
 </div>
 
+
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script>        
+
+        $("#ImageUpload").change(function () {
+            readURL(this);
+        });
+    </script>
 }

@@ -91,7 +91,10 @@
                 @Html.DisplayFor(modelItem => item.Delivery_date)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Requistion_pack)
+                @*@Html.DisplayFor(modelItem => item.Requistion_pack)*@
+                <a href="~/Asset/PDFViewerNewTab?fileName=@item.Requistion_pack" target="_blank">
+                    @item.Requistion_pack
+                </a>
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Image)

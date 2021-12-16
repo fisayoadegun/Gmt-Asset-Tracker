@@ -43,10 +43,10 @@ namespace Gmt_Asset_Tracker.Models
         //FINANCIAL
 
         [Display(Name = "Purchased Price")]
-        public decimal Purchased_price { get; set; }
+        public string Purchased_price { get; set; }
 
         [Display(Name = "Vendor")]
-        public int VendorId { get; set; }
+        public int VendorId { get; set; } = 1;
 
         [Display(Name = "Delivery Date")]
         public DateTime Delivery_date { get; set; }
@@ -56,6 +56,7 @@ namespace Gmt_Asset_Tracker.Models
 
         [NotMapped]
         [FileExtension]
+        [Display(Name = "Upload Asset Requisition Pack")]
         public IFormFile RequistionpackUpload { get; set; }
 
         // ASSET VERIFICATION
@@ -72,6 +73,7 @@ namespace Gmt_Asset_Tracker.Models
 
         [NotMapped]
         [FileExtension]
+        [Display(Name = "Choose Image")]
         public IFormFile ImageUpload { get; set; }
 
         [ForeignKey("CategoryId")]
@@ -98,7 +100,6 @@ namespace Gmt_Asset_Tracker.Models
         [ForeignKey("CheckId")]
         [Display(Name = "Physical Check")]
         public virtual Physical_check Physical_check { get; set; }
-
-
+       
     }
 }
