@@ -10,15 +10,15 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Gmt_Asset_Tracker.Migrations
 {
     [DbContext(typeof(AssetTrackerContext))]
-    [Migration("20211215110651_firstmigration")]
-    partial class firstmigration
+    [Migration("20211218212144_testingrubbishagains")]
+    partial class testingrubbishagains
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
-                .HasAnnotation("ProductVersion", "5.0.11")
+                .HasAnnotation("ProductVersion", "5.0.12")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
             modelBuilder.Entity("Gmt_Asset_Tracker.Models.Asset", b =>
@@ -35,9 +35,11 @@ namespace Gmt_Asset_Tracker.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Asset_name")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Asset_tag")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Assigned_to")
@@ -61,14 +63,14 @@ namespace Gmt_Asset_Tracker.Migrations
                     b.Property<int>("LocationId")
                         .HasColumnType("int");
 
-                    b.Property<int>("PresentLocationId")
+                    b.Property<int?>("PresentLocationId")
                         .HasColumnType("int");
 
                     b.Property<string>("Present_user")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal>("Purchased_price")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<string>("Purchased_price")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Requistion_pack")
                         .HasColumnType("nvarchar(max)");
@@ -90,6 +92,8 @@ namespace Gmt_Asset_Tracker.Migrations
                     b.HasIndex("DepartmentId");
 
                     b.HasIndex("LocationId");
+
+                    b.HasIndex("PresentLocationId");
 
                     b.HasIndex("VendorId");
 
@@ -218,6 +222,10 @@ namespace Gmt_Asset_Tracker.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Gmt_Asset_Tracker.Models.Location", "Present_location")
+                        .WithMany()
+                        .HasForeignKey("PresentLocationId");
+
                     b.HasOne("Gmt_Asset_Tracker.Models.Vendor", "Vendor")
                         .WithMany()
                         .HasForeignKey("VendorId")
@@ -233,6 +241,8 @@ namespace Gmt_Asset_Tracker.Migrations
                     b.Navigation("Location");
 
                     b.Navigation("Physical_check");
+
+                    b.Navigation("Present_location");
 
                     b.Navigation("Vendor");
                 });

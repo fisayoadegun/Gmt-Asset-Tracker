@@ -27,18 +27,21 @@
                 <select asp-for="CategoryId" class="form-control" asp-items="ViewBag.CategoryId">
                     <option value="0">Choose a category</option>
                 </select>
+                <span asp-validation-for="CategoryId" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="LocationId" class="control-label"></label>
                 <select asp-for="LocationId" class="form-control" asp-items="ViewBag.LocationId">
                     <option value="0">Choose a Location</option>
                 </select>
+                <span asp-validation-for="LocationId" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="DepartmentId" class="control-label"></label>
                 <select asp-for="DepartmentId" class="form-control" asp-items="ViewBag.DepartmentId">
                     <option value="0">Choose a Department</option>
                 </select>
+                <span asp-validation-for="DepartmentId" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="AssetStateId" class="control-label"></label>
@@ -71,6 +74,7 @@
                 <select asp-for="VendorId" class="form-control" asp-items="ViewBag.VendorId">
                     <option value="0">Choose a vendor</option>
                 </select>
+                <span asp-validation-for="VendorId" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Delivery_date" class="control-label"></label>
@@ -95,12 +99,12 @@
                 <img src="" id="imgpreview" class="pt-2" alt="" />
                 <span asp-validation-for="ImageUpload" class="text-danger"></span>
             </div>
-            <div class="form-group">
+            @*<div class="form-group">
                 <label asp-for="PresentLocationId" class="control-label"></label>
                 <select asp-for="PresentLocationId" class="form-control" asp-items="ViewBag.PresentLocationId">
                     <option value="0">Choose a Location</option>
                 </select>
-            </div>
+            </div>*@
             @*<div class="form-group">
             <label asp-for="Present_user" class="control-label"></label>
             <input asp-for="Present_user" class="form-control" />

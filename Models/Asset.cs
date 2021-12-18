@@ -15,23 +15,30 @@ namespace Gmt_Asset_Tracker.Models
         public int Id { get; set; }
 
         [Display(Name = "Asset Name")]
+        [Required, MinLength(2, ErrorMessage = "Minimum length is 2")]
         public string Asset_name { get; set; }
         [Display(Name = "Description")]
+        //[Required, MinLength(4, ErrorMessage = "Minimum length is 4")]
         public string Asset_description { get; set; }
 
         [Display(Name = "Category")]
+        [Range(1, int.MaxValue, ErrorMessage = "You must choose a category")]
         public int CategoryId { get; set; }
 
         [Display(Name = "Location")]
+        [Range(1, int.MaxValue, ErrorMessage = "You must choose a location")]
         public int LocationId { get; set; }
 
         [Display(Name = "Department")]
+        [Range(1, int.MaxValue, ErrorMessage = "Department is required")]
         public int DepartmentId { get; set; }
         
         [Display(Name = "Asset State")]
+        [Range(1, int.MaxValue, ErrorMessage = "You must choose an asset state")]
         public int AssetStateId { get; set; }
 
         [Display(Name = "Asset Tag")]
+        [Required]
         public string Asset_tag { get; set; }
 
         [Display(Name = "Service Tag")]
@@ -46,9 +53,11 @@ namespace Gmt_Asset_Tracker.Models
         public string Purchased_price { get; set; }
 
         [Display(Name = "Vendor")]
+        [Required]
         public int VendorId { get; set; } = 1;
 
         [Display(Name = "Delivery Date")]
+        [Required]
         public DateTime Delivery_date { get; set; }
 
         [Display(Name = "Requisition Pack")]
@@ -66,7 +75,8 @@ namespace Gmt_Asset_Tracker.Models
         public string Image { get; set; }
 
         [Display (Name = "Present Location")]
-        public int PresentLocationId { get; set; }
+        //[Required]
+        public int? PresentLocationId { get; set; }
 
         [Display (Name = "Present User")]
         public string Present_user { get; set; }
@@ -100,6 +110,7 @@ namespace Gmt_Asset_Tracker.Models
         [ForeignKey("CheckId")]
         [Display(Name = "Physical Check")]
         public virtual Physical_check Physical_check { get; set; }
+        
        
     }
 }

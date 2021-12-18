@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Gmt_Asset_Tracker.Migrations
 {
-    public partial class firstmigration : Migration
+    public partial class testingrubbishagains : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -50,7 +50,7 @@ namespace Gmt_Asset_Tracker.Migrations
                 name: "Locations",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<int>(type: "int", nullable: true)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Location_name = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
@@ -91,22 +91,22 @@ namespace Gmt_Asset_Tracker.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Asset_name = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Asset_name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Asset_description = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CategoryId = table.Column<int>(type: "int", nullable: false),
                     LocationId = table.Column<int>(type: "int", nullable: false),
                     DepartmentId = table.Column<int>(type: "int", nullable: false),
                     AssetStateId = table.Column<int>(type: "int", nullable: false),
-                    Asset_tag = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Asset_tag = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Service_tag = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Assigned_to = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Purchased_price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Purchased_price = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     VendorId = table.Column<int>(type: "int", nullable: false),
                     Delivery_date = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Requistion_pack = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CheckId = table.Column<int>(type: "int", nullable: false),
                     Image = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    PresentLocationId = table.Column<int>(type: "int", nullable: false),
+                    PresentLocationId = table.Column<int>(type: "int", nullable: true),
                     Present_user = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
@@ -136,6 +136,12 @@ namespace Gmt_Asset_Tracker.Migrations
                         principalTable: "Locations",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Assets_Locations_PresentLocationId",
+                        column: x => x.PresentLocationId,
+                        principalTable: "Locations",
+                        principalColumn: "Id"
+                        /*onDelete: ReferentialAction.Restrict*/);
                     table.ForeignKey(
                         name: "FK_Assets_Physical_Checks_CheckId",
                         column: x => x.CheckId,
@@ -174,6 +180,11 @@ namespace Gmt_Asset_Tracker.Migrations
                 name: "IX_Assets_LocationId",
                 table: "Assets",
                 column: "LocationId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Assets_PresentLocationId",
+                table: "Assets",
+                column: "PresentLocationId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Assets_VendorId",

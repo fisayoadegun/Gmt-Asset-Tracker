@@ -33,9 +33,11 @@ namespace Gmt_Asset_Tracker.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Asset_name")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Asset_tag")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Assigned_to")
@@ -59,7 +61,7 @@ namespace Gmt_Asset_Tracker.Migrations
                     b.Property<int>("LocationId")
                         .HasColumnType("int");
 
-                    b.Property<int>("PresentLocationId")
+                    b.Property<int?>("PresentLocationId")
                         .HasColumnType("int");
 
                     b.Property<string>("Present_user")
@@ -220,9 +222,7 @@ namespace Gmt_Asset_Tracker.Migrations
 
                     b.HasOne("Gmt_Asset_Tracker.Models.Location", "Present_location")
                         .WithMany()
-                        .HasForeignKey("PresentLocationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("PresentLocationId");
 
                     b.HasOne("Gmt_Asset_Tracker.Models.Vendor", "Vendor")
                         .WithMany()

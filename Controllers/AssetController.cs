@@ -27,7 +27,7 @@ namespace Gmt_Asset_Tracker.Controllers
         // GET: Asset
         public async Task<IActionResult> Index()
         {
-            var assetTrackerContext = _context.Assets.Include(a => a.Asset_State).Include(a => a.Category).Include(a => a.Department).Include(a => a.Location).Include(a => a.Physical_check).Include(a => a.Present_location).Include(a => a.Vendor);
+            var assetTrackerContext = _context.Assets.Include(a => a.Asset_State).Include(a => a.Category).Include(a => a.Department).Include(a => a.Location).Include(a => a.Present_location).Include(a => a.Vendor);
             return View(await assetTrackerContext.ToListAsync());
         }
 
