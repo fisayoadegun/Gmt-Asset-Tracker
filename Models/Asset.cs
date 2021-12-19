@@ -42,6 +42,7 @@ namespace Gmt_Asset_Tracker.Models
         public string Asset_tag { get; set; }
 
         [Display(Name = "Service Tag")]
+        [Required]
         public string Service_tag { get; set; }
 
         [Display(Name = "Assigned To")]
@@ -64,13 +65,13 @@ namespace Gmt_Asset_Tracker.Models
         public string Requistion_pack { get; set; }
 
         [NotMapped]
-        [FileExtension]
+        [PdfExtension]
         [Display(Name = "Upload Asset Requisition Pack")]
         public IFormFile RequistionpackUpload { get; set; }
 
         // ASSET VERIFICATION
         [Display (Name = "Physical Check")]
-        public int CheckId { get; set; }
+        public int? CheckId { get; set; }
 
         public string Image { get; set; }
 

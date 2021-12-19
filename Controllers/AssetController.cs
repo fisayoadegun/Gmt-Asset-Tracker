@@ -78,6 +78,18 @@ namespace Gmt_Asset_Tracker.Controllers
         {
             if (ModelState.IsValid)
             {
+                var assettag = await _context.Assets.FirstOrDefaultAsync(x => x.Asset_tag == asset.Asset_tag);
+                if (assettag != null)
+                {
+                    ModelState.AddModelError("", "An asset with this asset tag already exists.");
+                    return View(asset);
+                }
+                var servicetag = await _context.Assets.FirstOrDefaultAsync(x => x.Service_tag == asset.Service_tag);
+                if (servicetag != null)
+                {
+                    ModelState.AddModelError("", "An asset with this service tag already exists");
+                    return View(asset);
+                }
                 string imageName = "noimage.png";
                 if (asset.ImageUpload != null)
                 {
@@ -155,6 +167,18 @@ namespace Gmt_Asset_Tracker.Controllers
             
             if (ModelState.IsValid)
             {
+                var assettag = await _context.Assets.Where(x => x.Id != id).FirstOrDefaultAsync(x => x.Asset_tag == asset.Asset_tag);
+                if (assettag != null)
+                {
+                    ModelState.AddModelError("", "An asset with this asset tag already exists.");
+                    return View(asset);
+                }
+                var servicetag = await _context.Assets.Where(x => x.Id != id).FirstOrDefaultAsync(x => x.Service_tag == asset.Service_tag);
+                if (servicetag != null)
+                {
+                    ModelState.AddModelError("", "An asset with this service tag already exists");
+                    return View(asset);
+                }
                 string imageName = "noimage.png";
                 if (asset.ImageUpload != null)
                 {
