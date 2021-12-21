@@ -14,6 +14,7 @@ using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 using Gmt_Asset_Tracker.ViewModels;
 using Microsoft.Extensions.Hosting;
 using System.Net;
+using System.Drawing.Printing;
 
 namespace Gmt_Asset_Tracker.Controllers
 {
@@ -29,10 +30,26 @@ namespace Gmt_Asset_Tracker.Controllers
 		}
 
 		// GET: Asset
-		public async Task<IActionResult> Index()
+		public async Task<IActionResult> Index(int p = 1)
 		{
-			var assetTrackerContext = _context.Assets.Include(a => a.Asset_State).Include(a => a.Category).Include(a => a.Department).Include(a => a.Location).Include(a => a.Present_location).Include(a => a.Vendor);
-			return View(await assetTrackerContext.ToListAsync());
+			int pagesize = 2;
+			var assets = _context.Assets.Include(a => a.Asset_State)
+				.Include(a => a.Category)
+				.Include(a => a.Department)
+				.Include(a => a.Location)
+				.Include(a => a.Present_location)
+				.Include(a => a.Vendor)
+				.Skip((p - 1) * pagesize)
+				.Take(pagesize);
+
+
+
+			ViewBag.PageNumber = p;
+			ViewBag.PageRange = pagesize;
+			ViewBag.TotalPages = (int)Math.Ceiling((decimal)_context.Assets.Count() / pagesize);
+
+			//var assetTrackerContext = _context.Assets.Include(a => a.Asset_State).Include(a => a.Category).Include(a => a.Department).Include(a => a.Location).Include(a => a.Present_location).Include(a => a.Vendor);
+			return View(await assets.ToListAsync());
 		}
 
 		// GET: Asset/Details/5
@@ -144,8 +161,6 @@ namespace Gmt_Asset_Tracker.Controllers
 				return NotFound();
 			}
 
-			
-			
 			ViewData["AssetStateId"] = new SelectList(_context.Asset_States, "Id", "Asset_state", asset.AssetStateId);
 			ViewBag.CategoryId = new SelectList(_context.Categories, "Id", "Category_name", asset.CategoryId);
 			ViewData["DepartmentId"] = new SelectList(_context.Departments, "Id", "Department_name", asset.DepartmentId);
@@ -183,7 +198,7 @@ namespace Gmt_Asset_Tracker.Controllers
 					ModelState.AddModelError("", "An asset with this service tag already exists");
 					return View(asset);
 				}
-				
+
 				if (asset.ImageUpload != null)
 				{
 					string uploadsDir = Path.Combine(_webHostEnvironment.WebRootPath, "media/images/");
@@ -202,7 +217,7 @@ namespace Gmt_Asset_Tracker.Controllers
 					fs.Close();
 					asset.Image = imageName;
 				}
-				
+
 				if (asset.RequistionpackUpload != null)
 				{
 					string fileName = $"{hostingEnvironment.WebRootPath}\\media\\pdfs\\{asset.RequistionpackUpload.FileName}";
@@ -222,8 +237,6 @@ namespace Gmt_Asset_Tracker.Controllers
 					}
 					asset.Requistion_pack = pdffile;
 				}
-				
-				
 
 				_context.Update(asset);
 				_context.Entry(asset).Property(u => u.PresentLocationId).IsModified = false;
@@ -337,7 +350,7 @@ namespace Gmt_Asset_Tracker.Controllers
 					fileStream.Flush();
 				}
 			}
-			asset.Requistion_pack = pdffile;			
+			asset.Requistion_pack = pdffile;
 			_context.Assets.Attach(asset);
 			var entry = _context.Entry(asset);
 			entry.State = EntityState.Unchanged;

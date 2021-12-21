@@ -16,8 +16,8 @@
                 @Html.DisplayNameFor(model => model.Asset_name)
             </th>
             @*<th>
-                @Html.DisplayNameFor(model => model.Asset_description)
-            </th>*@
+                    @Html.DisplayNameFor(model => model.Asset_description)
+                </th>*@
             <th>
                 @Html.DisplayNameFor(model => model.Asset_tag)
             </th>
@@ -28,17 +28,17 @@
                 @Html.DisplayNameFor(model => model.Assigned_to)
             </th>
             @*<th>
-                @Html.DisplayNameFor(model => model.Purchased_price)
-            </th>*@
+                    @Html.DisplayNameFor(model => model.Purchased_price)
+                </th>*@
             <th>
                 @Html.DisplayNameFor(model => model.Delivery_date)
             </th>
             @*<th>
-                @Html.DisplayNameFor(model => model.Requistion_pack)
-            </th>*@
+                    @Html.DisplayNameFor(model => model.Requistion_pack)
+                </th>*@
             @*<th>
-                @Html.DisplayNameFor(model => model.Image)
-            </th>*@
+                    @Html.DisplayNameFor(model => model.Image)
+                </th>*@
             <th>
                 @Html.DisplayNameFor(model => model.Present_user)
             </th>
@@ -74,8 +74,8 @@
                     @Html.DisplayFor(modelItem => item.Asset_name)
                 </td>
                 @*<td>
-                    @Html.DisplayFor(modelItem => item.Asset_description)
-                </td>*@
+                        @Html.DisplayFor(modelItem => item.Asset_description)
+                    </td>*@
                 <td>
                     @Html.DisplayFor(modelItem => item.Asset_tag)
                 </td>
@@ -86,20 +86,20 @@
                     @Html.DisplayFor(modelItem => item.Assigned_to)
                 </td>
                 @*<td>
-                    @Html.DisplayFor(modelItem => item.Purchased_price)
-                </td>*@
+                        @Html.DisplayFor(modelItem => item.Purchased_price)
+                    </td>*@
                 <td>
                     @Html.DisplayFor(modelItem => item.Delivery_date)
                 </td>
                 <!--<td>-->
-                    @*@Html.DisplayFor(modelItem => item.Requistion_pack)*@
-                    <!--<a href="~/Asset/PDFViewerNewTab?fileName=@item.Requistion_pack" target="_blank">
+                @*@Html.DisplayFor(modelItem => item.Requistion_pack)*@
+                <!--<a href="~/Asset/PDFViewerNewTab?fileName=@item.Requistion_pack" target="_blank">
                         @item.Requistion_pack
                     </a>
                 </td>-->
                 @*<td>
-                    @Html.DisplayFor(modelItem => item.Image)
-                </td>*@
+                        @Html.DisplayFor(modelItem => item.Image)
+                    </td>*@
                 <td>
                     @Html.DisplayFor(modelItem => item.Present_user)
                 </td>
@@ -134,3 +134,5 @@
         }
     </tbody>
 </table>
+
+<pagination page-count="@ViewBag.TotalPages" page-target="/asset" page-number="@ViewBag.PageNumber" page-range="@ViewBag.PageRange"></pagination>
