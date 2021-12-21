@@ -46,7 +46,7 @@ namespace Gmt_Asset_Tracker.Migrations
                     b.Property<int>("CategoryId")
                         .HasColumnType("int");
 
-                    b.Property<int>("CheckId")
+                    b.Property<int?>("CheckId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("Delivery_date")
@@ -74,6 +74,7 @@ namespace Gmt_Asset_Tracker.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Service_tag")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("VendorId")
@@ -204,9 +205,7 @@ namespace Gmt_Asset_Tracker.Migrations
 
                     b.HasOne("Gmt_Asset_Tracker.Models.Physical_check", "Physical_check")
                         .WithMany()
-                        .HasForeignKey("CheckId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("CheckId");
 
                     b.HasOne("Gmt_Asset_Tracker.Models.Department", "Department")
                         .WithMany()

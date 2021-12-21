@@ -1,18 +1,19 @@
-﻿using Gmt_Asset_Tracker.Data;
-using Microsoft.AspNetCore.Http;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using Gmt_Asset_Tracker.Data;
+using System.Xml.Linq;
+using Gmt_Asset_Tracker.Models;
+using Microsoft.AspNetCore.Http;
 
-namespace Gmt_Asset_Tracker.Models
+namespace Gmt_Asset_Tracker.ViewModels
 {
-	public class Asset
+	public class AssetViewModel
 	{
-		// GENERAL
-		public int Id { get; set; }
+		public string Id { get; set; }
 
 		[Display(Name = "Asset Name")]
 		[Required, MinLength(2, ErrorMessage = "Minimum length is 2")]
@@ -23,19 +24,19 @@ namespace Gmt_Asset_Tracker.Models
 
 		[Display(Name = "Category")]
 		[Range(1, int.MaxValue, ErrorMessage = "You must choose a category")]
-		public int CategoryId { get; set; }
+		public string CategoryId { get; set; }
 
 		[Display(Name = "Location")]
 		[Range(1, int.MaxValue, ErrorMessage = "You must choose a location")]
-		public int LocationId { get; set; }
+		public string LocationId { get; set; }
 
 		[Display(Name = "Department")]
 		[Range(1, int.MaxValue, ErrorMessage = "Department is required")]
-		public int DepartmentId { get; set; }
+		public string DepartmentId { get; set; }
 
 		[Display(Name = "Asset State")]
 		[Range(1, int.MaxValue, ErrorMessage = "You must choose an asset state")]
-		public int AssetStateId { get; set; }
+		public string AssetStateId { get; set; }
 
 		[Display(Name = "Asset Tag")]
 		[Required]
@@ -55,62 +56,32 @@ namespace Gmt_Asset_Tracker.Models
 
 		[Display(Name = "Vendor")]
 		[Range(1, int.MaxValue, ErrorMessage = "You must choose a vendor")]
-		public int VendorId { get; set; } = 1;
+		public string VendorId { get; set; }
 
 		[Display(Name = "Delivery Date")]
 		[Required]
-		public DateTime Delivery_date { get; set; }
+		public string Delivery_date { get; set; }
 
 		[Display(Name = "Requisition Pack")]
 		public string Requistion_pack { get; set; }
 
-		[NotMapped]
-		[PdfExtension]
-		[Display(Name = "Upload Asset Requisition Pack")]
-		public IFormFile RequistionpackUpload { get; set; }
-
 		// ASSET VERIFICATION
 		[Display(Name = "Physical Check")]
 		[Range(1, int.MaxValue, ErrorMessage = "You must choose a check state")]
-		public int? CheckId { get; set; }
+		public string CheckId { get; set; }
 
 		public string Image { get; set; }
 
 		[Display(Name = "Present Location")]
 		[Range(1, int.MaxValue, ErrorMessage = "You must choose a present location")]
-		public int? PresentLocationId { get; set; }
+		public string PresentLocationId { get; set; }
 
 		[Display(Name = "Present User")]
 		public string Present_user { get; set; }
 
-		//
 		[NotMapped]
 		[FileExtension]
 		[Display(Name = "Choose Image")]
 		public IFormFile ImageUpload { get; set; }
-
-		[ForeignKey("CategoryId")]
-		public virtual Category Category { get; set; }
-
-		[ForeignKey("LocationId")]
-		public virtual Location Location { get; set; }
-
-		[ForeignKey("PresentLocationId")]
-		[Display(Name = "Present Location")]
-		public virtual Location Present_location { get; set; }
-
-		[ForeignKey("DepartmentId")]
-		public virtual Department Department { get; set; }
-
-		[ForeignKey("AssetStateId")]
-		[Display(Name = "Asset State")]
-		public virtual Asset_State Asset_State { get; set; }
-
-		[ForeignKey("VendorId")]
-		public virtual Vendor Vendor { get; set; }
-
-		[ForeignKey("CheckId")]
-		[Display(Name = "Physical Check")]
-		public virtual Physical_check Physical_check { get; set; }
 	}
 }

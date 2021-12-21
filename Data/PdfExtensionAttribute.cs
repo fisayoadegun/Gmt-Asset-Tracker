@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Gmt_Asset_Tracker.Data
 {
-	public class FileExtensionAttribute : ValidationAttribute
+	public class PdfExtensionAttribute : ValidationAttribute
 	{
 		protected override ValidationResult IsValid(object value, ValidationContext validationContext)
 		{
@@ -20,7 +20,7 @@ namespace Gmt_Asset_Tracker.Data
 			{
 				var extension = Path.GetExtension(file.FileName);
 
-				string[] extensions = { "jpg", "png", "JPEG" };
+				string[] extensions = { "pdf" };
 				bool result = extensions.Any(x => extension.EndsWith(x));
 
 				if (!result)
@@ -34,7 +34,7 @@ namespace Gmt_Asset_Tracker.Data
 
 		private string GetErrorMessage()
 		{
-			return "Allowed extensions are jpg, png and JPEG.";
+			return "Allowed extension is pdf.";
 		}
 	}
 }

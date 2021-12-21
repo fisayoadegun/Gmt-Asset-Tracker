@@ -1,0 +1,143 @@
+﻿@model Gmt_Asset_Tracker.Models.Asset
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h1>Asset Verification for @Model.Asset_name</h1>
+
+<h4>Asset</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="AssetVerification" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="Image" />
+            @*<div class="form-group">
+                    <label asp-for="Asset_name" class="control-label"></label>
+                    <input asp-for="Asset_name" class="form-control" />
+                    <span asp-validation-for="Asset_name" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Asset_description" class="control-label"></label>
+                    <input asp-for="Asset_description" class="form-control" />
+                    <span asp-validation-for="Asset_description" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="CategoryId" class="control-label"></label>
+                    <select asp-for="CategoryId" class="form-control" asp-items="ViewBag.CategoryId">
+                        <option value="0">Choose a category</option>
+                    </select>
+                    <span asp-validation-for="CategoryId" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="LocationId" class="control-label"></label>
+                    <select asp-for="LocationId" class="form-control" asp-items="ViewBag.LocationId">
+                        <option value="0">Choose a Location</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label asp-for="DepartmentId" class="control-label"></label>
+                    <select asp-for="DepartmentId" class="form-control" asp-items="ViewBag.DepartmentId">
+                        <option value="0">Choose a Department</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label asp-for="AssetStateId" class="control-label"></label>
+                    <select asp-for="AssetStateId" class="form-control" asp-items="ViewBag.AssetStateId">
+                        <option value="0">Choose Asset State</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Asset_tag" class="control-label"></label>
+                    <input asp-for="Asset_tag" class="form-control" />
+                    <span asp-validation-for="Asset_tag" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Service_tag" class="control-label"></label>
+                    <input asp-for="Service_tag" class="form-control" />
+                    <span asp-validation-for="Service_tag" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Assigned_to" class="control-label"></label>
+                    <input asp-for="Assigned_to" class="form-control" />
+                    <span asp-validation-for="Assigned_to" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Purchased_price" class="control-label"></label>
+                    <input asp-for="Purchased_price" class="form-control" />
+                    <span asp-validation-for="Purchased_price" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="VendorId" class="control-label"></label>
+                    <select asp-for="VendorId" class="form-control" asp-items="ViewBag.VendorId">
+                        <option value="0">Choose a vendor</option>
+                    </select>
+                    <span asp-validation-for="VendorId" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Delivery_date" class="control-label"></label>
+                    <input asp-for="Delivery_date" class="form-control" />
+                    <span asp-validation-for="Delivery_date" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Requistion_pack" class="control-label">
+                        <a href="~/Asset/PDFViewerNewTab?fileName=@Model.Requistion_pack" target="_blank">
+                            @Model.Requistion_pack
+                        </a>
+                    </label>
+                    <input asp-for="RequistionpackUpload" class="form-control" />
+                    <span asp-validation-for="RequistionpackUpload" class="text-danger"></span>
+                </div>*@
+            <div class="form-group">
+                <label asp-for="CheckId" class="control-label"></label>
+                <select asp-for="CheckId" class="form-control" asp-items="ViewBag.CheckId">
+                    <option value="0">Physical check?</option>
+                </select>
+                <span asp-validation-for="CheckId" class="text-danger" />
+            </div>
+            <div class="form-group">
+                <label asp-for="Image" class="control-label">Current Image</label>
+                <img src="~/media/images/@Model.Image" width="200" alt="" />
+                <input asp-for="Image" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label asp-for="Image" class="control-label">New Asset Image</label>
+                <input asp-for="ImageUpload" class="form-control" />
+                <img src="" id="imgpreview" class="pt-2" alt="" />
+                <span asp-validation-for="ImageUpload" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="PresentLocationId" class="control-label"></label>
+                <select asp-for="PresentLocationId" class="form-control" asp-items="ViewBag.PresentLocationId">
+                    <option value="0">Choose a Location</option>
+                </select>
+                <span asp-validation-for="PresentLocationId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Present_user" class="control-label"></label>
+                <input asp-for="Present_user" class="form-control" />
+                <span asp-validation-for="Present_user" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Verify" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script>
+
+        $("#ImageUpload").change(function () {
+            readURL(this);
+        });
+    </script>
+}
