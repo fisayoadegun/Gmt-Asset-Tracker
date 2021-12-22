@@ -3,8 +3,116 @@
 @{
     ViewData["Title"] = "Details";
 }
+<link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+<script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
+<!------ Include the above in your HEAD tag ---------->
 
-<h1>Details</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Asset Detail</title>
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,700" rel="stylesheet">
+    <link href="~/css/detail.css" rel="stylesheet" />
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="card">
+            <div class="container-fliud">
+                <div class="wrapper row">
+                    <div class="preview col-md-6">
+
+                        <div class="preview-pic tab-content">
+                            <div class="tab-pane active" id="pic-1"><img src="~/media/images/@Model.Image" /></div>
+                        </div>
+                        <ul class="preview-thumbnail nav nav-tabs">
+                            <li class="active"><a data-target="#pic-1" data-toggle="tab"><img src="~/media/images/@Model.Image" /></a></li>
+                        </ul>
+                    </div>
+                    <div class="details col-md-6">
+                        <h3 class="product-title">@Html.DisplayFor(model => model.Asset_name)</h3>
+                        <p class="product-description">@Html.DisplayFor(model => model.Asset_description)</p>
+                        <h4 class="price"><span></span></h4>
+                        <p class="vote"><strong></strong><strong></strong></p>
+                        <h5 class="sizes">
+                            @Html.DisplayNameFor(model => model.Asset_tag):
+                            <span>@Html.DisplayFor(model => model.Asset_tag)</span>
+                        </h5>
+                        <h5 class="sizes">
+                            @Html.DisplayNameFor(model => model.Service_tag):
+                            <span>@Html.DisplayFor(model => model.Service_tag)</span>
+                        </h5>
+                        <h5 class="sizes">
+                            @Html.DisplayNameFor(model => model.Assigned_to):
+                            <span>@Html.DisplayFor(model => model.Assigned_to)</span>
+                        </h5>
+                        <h5 class="sizes">
+                            @Html.DisplayNameFor(model => model.Purchased_price):
+                            <span> &#x20A6;@Html.DisplayFor(model => model.Purchased_price)</span>
+                        </h5>
+                        <h5 class="sizes">
+                            @Html.DisplayNameFor(model => model.Delivery_date):
+                            <span>@Html.DisplayFor(model => model.Delivery_date)</span>
+                        </h5>
+                        <h5 class="sizes">
+                            @Html.DisplayNameFor(model => model.Requistion_pack):
+                            <span>
+                                <a href="~/Asset/PDFViewerNewTab?fileName=@Model.Requistion_pack" target="_blank">
+                                    @Model.Requistion_pack
+                                </a>
+                            </span>
+                        </h5>
+                        <h5 class="sizes">
+                            @Html.DisplayNameFor(model => model.Present_user):
+                            <span>@Html.DisplayFor(model => model.Present_user)</span>
+                        </h5>
+                        <h5 class="sizes">
+                            @Html.DisplayNameFor(model => model.Category):
+                            <span>@Html.DisplayFor(model => model.Category.Category_name)</span>
+                        </h5>
+                        <h5 class="sizes">
+                            @Html.DisplayNameFor(model => model.Location):
+                            <span>@Html.DisplayFor(model => model.Location.Location_name)</span>
+                        </h5>
+                        <h5 class="sizes">
+                            @Html.DisplayNameFor(model => model.Present_location):
+                            <span>@Html.DisplayFor(model => model.Present_location.Location_name)</span>
+                        </h5>
+                        <h5 class="sizes">
+                            @Html.DisplayNameFor(model => model.Department):
+                            <span>@Html.DisplayFor(model => model.Department.Department_name)</span>
+                        </h5>
+                        <h5 class="sizes">
+                            @Html.DisplayNameFor(model => model.Asset_State):
+                            <span>@Html.DisplayFor(model => model.Asset_State.Asset_state)</span>
+                        </h5>
+                        <h5 class="sizes">
+                            @Html.DisplayNameFor(model => model.Vendor):
+                            <span>@Html.DisplayFor(model => model.Vendor.Vendor_name)</span>
+                        </h5>
+                        <h5 class="sizes">
+                            @Html.DisplayNameFor(model => model.Physical_check):
+                            <span>@Html.DisplayFor(model => model.Physical_check.Check_name)</span>
+                        </h5>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |
+                <a asp-action="Index">Back to List</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+<!--<h1>Details</h1>
 
 <div>
     <h4>Asset</h4>
@@ -44,7 +152,7 @@
             @Html.DisplayNameFor(model => model.Purchased_price)
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Purchased_price)
+            &#x20A6;@Html.DisplayFor(model => model.Purchased_price)
         </dd>
         <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Delivery_date)
@@ -55,9 +163,9 @@
         <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Requistion_pack)
         </dt>
-        <dd class="col-sm-10">
-            @*@Html.DisplayNameFor(model => model.Requistion_pack)*@
-            <a href="~/Asset/PDFViewerNewTab?fileName=@Model.Requistion_pack" target="_blank">
+        <dd class="col-sm-10">-->
+@*@Html.DisplayNameFor(model => model.Requistion_pack)*@
+<!--<a href="~/Asset/PDFViewerNewTab?fileName=@Model.Requistion_pack" target="_blank">
                 @Model.Requistion_pack
             </a>
         </dd>
@@ -120,4 +228,4 @@
 <div>
     <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |
     <a asp-action="Index">Back to List</a>
-</div>
+</div>-->

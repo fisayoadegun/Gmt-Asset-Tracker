@@ -32,17 +32,17 @@ namespace Gmt_Asset_Tracker.Controllers
 		// GET: Asset
 		public async Task<IActionResult> Index(int p = 1)
 		{
-			int pagesize = 2;
+			int pagesize = 5;
 			var assets = _context.Assets.Include(a => a.Asset_State)
 				.Include(a => a.Category)
 				.Include(a => a.Department)
 				.Include(a => a.Location)
 				.Include(a => a.Present_location)
 				.Include(a => a.Vendor)
+				.Include(a => a.Physical_check)
+				.OrderByDescending(p => p.Delivery_date)
 				.Skip((p - 1) * pagesize)
 				.Take(pagesize);
-
-
 
 			ViewBag.PageNumber = p;
 			ViewBag.PageRange = pagesize;
