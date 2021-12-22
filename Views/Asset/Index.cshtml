@@ -4,12 +4,92 @@
     ViewData["Title"] = "Index";
 }
 
+<style>
+
+    .card {
+        overflow: hidden;
+    }
+
+    .card-block .rotate {
+        z-index: 8;
+        float: right;
+        height: 100%;
+    }
+
+        .card-block .rotate i {
+            color: rgba(20, 20, 20, 0.15);
+            position: absolute;
+            left: 0;
+            left: auto;
+            right: -10px;
+            bottom: 0;
+            display: block;
+            -webkit-transform: rotate(-44deg);
+            -moz-transform: rotate(-44deg);
+            -o-transform: rotate(-44deg);
+            -ms-transform: rotate(-44deg);
+            transform: rotate(-44deg);
+        }
+</style>
+
+<div class="row mb-3">
+    <div class="col-xl-3 col-lg-6">
+        <div class="card card-inverse card-danger">
+            <div class="card-block bg-danger">
+                <div class="rotate">
+                    <i class="fas fa-shopping-bag fa-4x"></i>
+                </div>
+                <h6 class="text-uppercase" style="color:floralwhite">Assets</h6>
+                <h1 class="display-1" style="color:floralwhite">@ViewData["Assets"]</h1>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-lg-6">
+        <div class="card card-inverse card-success">
+            <div class="card-block bg-success">
+                <div class="rotate">
+                    <i class="fa fa-store fa-5x"></i>
+                </div>
+                <h6 class="text-uppercase" style="color:floralwhite">Vendors</h6>
+                <h1 class="display-1" style="color:floralwhite">@ViewData["Vendors"]</h1>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-lg-6">
+        <div class="card card-inverse card-warning">
+            <div class="card-block bg-warning">
+                <div class="rotate">
+                    <i class="far fa-building fa-5x"></i>
+                </div>
+                <h6 class="text-uppercase" style="color:floralwhite">Deparments</h6>
+                <h1 class="display-1" style="color:floralwhite">@ViewData["Departments"]</h1>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-lg-6">
+        <div class="card card-inverse card-info">
+            <div class="card-block bg-info">
+                <div class="rotate">
+                    <i class="fas fa-map-marker-alt fa-5x"></i>
+                </div>
+                <h6 class="text-uppercase" style="color:floralwhite">Locations</h6>
+                <h1 class="display-1" style="color:floralwhite">@ViewData["Locations"]</h1>
+            </div>
+        </div>
+    </div>
+</div>
 <h1>Asset List</h1>
 
 <p>
     <a asp-action="Create">Add New Asset</a>
 </p>
-<table class="table table-striped w-auto">
+
+<div class="column">
+    <input type="text" id="myInput" onkeyup="myFunction()" placeholder="Search.." title="Type in a name">
+</div>
+
+<hr />
+<table class="table table-striped w-auto" id="myTable">
     <thead>
         <tr class="table-info">
             <th scope="row">
@@ -101,7 +181,7 @@
                     </a>
                 </td>-->
                 @*<td>
-                        @Html.DisplayFor(modelItem => item.Image)
+                    @Html.DisplayFor(modelItem => item.Image)
                     </td>*@
                 <td>
                     @Html.DisplayFor(modelItem => item.Present_user)
@@ -127,14 +207,14 @@
                 <td>
                     @Html.DisplayFor(modelItem => item.Physical_check.Check_name)
                 </td>
-                <td>                    
-                    <a asp-action="AssetVerification" asp-route-id="@item.Id" class="fas fa-check-double btn btn-success btn-sm active">Asset Verification</a>                    
+                <td>
+                    <a asp-action="AssetVerification" asp-route-id="@item.Id" class="fas fa-check-double btn btn-success btn-sm active">Asset Verification</a>
                 </td>
                 <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id" class="fas fa-edit btn btn-primary btn-sm active" role="button"></a>                    
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="fas fa-edit btn btn-primary btn-sm active" role="button"></a>
                 </td>
                 <td>
-                    <a asp-action="Details" asp-route-id="@item.Id" class="fas fa-info-circle btn btn-info btn-sm active" role="button"></a>                    
+                    <a asp-action="Details" asp-route-id="@item.Id" class="fas fa-info-circle btn btn-info btn-sm active" role="button"></a>
                 </td>
                 <td>
                     <a asp-action="Delete" asp-route-id="@item.Id" class="fas fa-trash btn btn-danger btn-sm active" role="button"></a>
@@ -145,3 +225,47 @@
 </table>
 
 <pagination page-count="@ViewBag.TotalPages" page-target="/asset" page-number="@ViewBag.PageNumber" page-range="@ViewBag.PageRange"></pagination>
+
+<script>
+    function myFunction() {
+
+        // Declare variables
+        var input = document.getElementById("myInput");
+        var filter = input.value.toUpperCase();
+        var table = document.getElementById("myTable");
+        var trs = table.tBodies[0].getElementsByTagName("tr");
+
+        // Loop through first tbody's rows
+        for (var i = 0; i < trs.length; i++) {
+
+            // define the row's cells
+            var tds = trs[i].getElementsByTagName("td");
+
+            // hide the row
+            trs[i].style.display = "none";
+
+            // loop through row cells
+            for (var i2 = 0; i2 < tds.length; i2++) {
+
+                // if there's a match
+                if (tds[i2].innerHTML.toUpperCase().indexOf(filter) > -1) {
+
+                    // show the row
+                    trs[i].style.display = "";
+
+                    // skip to the next row
+                    continue;
+
+                }
+            }
+        }
+
+    }
+
+    $(document).ready(function () {
+        $('#myTable').DataTable({
+            "paging": false // false to disable pagination (or any other option)
+        });
+        $('.dataTables_length').addClass('bs-select');
+    });
+</script>

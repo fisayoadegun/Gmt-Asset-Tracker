@@ -44,6 +44,11 @@ namespace Gmt_Asset_Tracker.Controllers
 				.Skip((p - 1) * pagesize)
 				.Take(pagesize);
 
+			ViewData["Assets"] = _context.Assets.Count();
+			ViewData["Vendors"] = _context.Vendors.Count();
+			ViewData["Departments"] = _context.Departments.Count();
+			ViewData["Locations"] = _context.Locations.Count();
+
 			ViewBag.PageNumber = p;
 			ViewBag.PageRange = pagesize;
 			ViewBag.TotalPages = (int)Math.Ceiling((decimal)_context.Assets.Count() / pagesize);
