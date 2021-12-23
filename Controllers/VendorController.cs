@@ -7,147 +7,149 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Gmt_Asset_Tracker.Data;
 using Gmt_Asset_Tracker.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Gmt_Asset_Tracker.Controllers
 {
-    public class VendorController : Controller
-    {
-        private readonly AssetTrackerContext _context;
+	[Authorize]
+	public class VendorController : Controller
+	{
+		private readonly AssetTrackerContext _context;
 
-        public VendorController(AssetTrackerContext context)
-        {
-            _context = context;
-        }
+		public VendorController(AssetTrackerContext context)
+		{
+			_context = context;
+		}
 
-        // GET: Vendor
-        public async Task<IActionResult> Index()
-        {
-            return View(await _context.Vendors.ToListAsync());
-        }
+		// GET: Vendor
+		public async Task<IActionResult> Index()
+		{
+			return View(await _context.Vendors.ToListAsync());
+		}
 
-        // GET: Vendor/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
+		// GET: Vendor/Details/5
+		public async Task<IActionResult> Details(int? id)
+		{
+			if (id == null)
+			{
+				return NotFound();
+			}
 
-            var vendor = await _context.Vendors
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (vendor == null)
-            {
-                return NotFound();
-            }
+			var vendor = await _context.Vendors
+				.FirstOrDefaultAsync(m => m.Id == id);
+			if (vendor == null)
+			{
+				return NotFound();
+			}
 
-            return View(vendor);
-        }
+			return View(vendor);
+		}
 
-        // GET: Vendor/Create
-        public IActionResult Create()
-        {
-            return View();
-        }
+		// GET: Vendor/Create
+		public IActionResult Create()
+		{
+			return View();
+		}
 
-        // POST: Vendor/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Vendor_name")] Vendor vendor)
-        {
-            if (ModelState.IsValid)
-            {
-                _context.Add(vendor);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(vendor);
-        }
+		// POST: Vendor/Create
+		// To protect from overposting attacks, enable the specific properties you want to bind to.
+		// For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> Create([Bind("Id,Vendor_name")] Vendor vendor)
+		{
+			if (ModelState.IsValid)
+			{
+				_context.Add(vendor);
+				await _context.SaveChangesAsync();
+				return RedirectToAction(nameof(Index));
+			}
+			return View(vendor);
+		}
 
-        // GET: Vendor/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
+		// GET: Vendor/Edit/5
+		public async Task<IActionResult> Edit(int? id)
+		{
+			if (id == null)
+			{
+				return NotFound();
+			}
 
-            var vendor = await _context.Vendors.FindAsync(id);
-            if (vendor == null)
-            {
-                return NotFound();
-            }
-            return View(vendor);
-        }
+			var vendor = await _context.Vendors.FindAsync(id);
+			if (vendor == null)
+			{
+				return NotFound();
+			}
+			return View(vendor);
+		}
 
-        // POST: Vendor/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Vendor_name")] Vendor vendor)
-        {
-            if (id != vendor.Id)
-            {
-                return NotFound();
-            }
+		// POST: Vendor/Edit/5
+		// To protect from overposting attacks, enable the specific properties you want to bind to.
+		// For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> Edit(int id, [Bind("Id,Vendor_name")] Vendor vendor)
+		{
+			if (id != vendor.Id)
+			{
+				return NotFound();
+			}
 
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(vendor);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!VendorExists(vendor.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            return View(vendor);
-        }
+			if (ModelState.IsValid)
+			{
+				try
+				{
+					_context.Update(vendor);
+					await _context.SaveChangesAsync();
+				}
+				catch (DbUpdateConcurrencyException)
+				{
+					if (!VendorExists(vendor.Id))
+					{
+						return NotFound();
+					}
+					else
+					{
+						throw;
+					}
+				}
+				return RedirectToAction(nameof(Index));
+			}
+			return View(vendor);
+		}
 
-        // GET: Vendor/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
+		// GET: Vendor/Delete/5
+		public async Task<IActionResult> Delete(int? id)
+		{
+			if (id == null)
+			{
+				return NotFound();
+			}
 
-            var vendor = await _context.Vendors
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (vendor == null)
-            {
-                return NotFound();
-            }
+			var vendor = await _context.Vendors
+				.FirstOrDefaultAsync(m => m.Id == id);
+			if (vendor == null)
+			{
+				return NotFound();
+			}
 
-            return View(vendor);
-        }
+			return View(vendor);
+		}
 
-        // POST: Vendor/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var vendor = await _context.Vendors.FindAsync(id);
-            _context.Vendors.Remove(vendor);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
+		// POST: Vendor/Delete/5
+		[HttpPost, ActionName("Delete")]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> DeleteConfirmed(int id)
+		{
+			var vendor = await _context.Vendors.FindAsync(id);
+			_context.Vendors.Remove(vendor);
+			await _context.SaveChangesAsync();
+			return RedirectToAction(nameof(Index));
+		}
 
-        private bool VendorExists(int id)
-        {
-            return _context.Vendors.Any(e => e.Id == id);
-        }
-    }
+		private bool VendorExists(int id)
+		{
+			return _context.Vendors.Any(e => e.Id == id);
+		}
+	}
 }

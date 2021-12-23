@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31515.178
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gmt Asset Tracker", "Gmt Asset Tracker.csproj", "{080917C8-BC2F-4E52-B510-E6F9CE18CA27}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gmt Asset Tracker", "Gmt Asset Tracker.csproj", "{080917C8-BC2F-4E52-B510-E6F9CE18CA27}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EmailService", "..\identity-aspnetcore-password-reset-identity\IdentityByExamples\EmailService\EmailService.csproj", "{12D6A91E-C962-4DD1-BA70-723F93112A22}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{080917C8-BC2F-4E52-B510-E6F9CE18CA27}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{080917C8-BC2F-4E52-B510-E6F9CE18CA27}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{080917C8-BC2F-4E52-B510-E6F9CE18CA27}.Release|Any CPU.Build.0 = Release|Any CPU
+		{12D6A91E-C962-4DD1-BA70-723F93112A22}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{12D6A91E-C962-4DD1-BA70-723F93112A22}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{12D6A91E-C962-4DD1-BA70-723F93112A22}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{12D6A91E-C962-4DD1-BA70-723F93112A22}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

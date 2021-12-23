@@ -27,4 +27,8 @@
     <Folder Include="wwwroot\media\pdfs\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\identity-aspnetcore-password-reset-identity\IdentityByExamples\EmailService\EmailService.csproj" />
+  </ItemGroup>
+
 </Project>

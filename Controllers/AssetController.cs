@@ -15,9 +15,11 @@ using Gmt_Asset_Tracker.ViewModels;
 using Microsoft.Extensions.Hosting;
 using System.Net;
 using System.Drawing.Printing;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Gmt_Asset_Tracker.Controllers
 {
+	[Authorize]
 	public class AssetController : Controller
 	{
 		private readonly AssetTrackerContext _context;
@@ -32,7 +34,7 @@ namespace Gmt_Asset_Tracker.Controllers
 		// GET: Asset
 		public async Task<IActionResult> Index(int p = 1)
 		{
-			int pagesize = 5;
+			int pagesize = 2;
 			var assets = _context.Assets.Include(a => a.Asset_State)
 				.Include(a => a.Category)
 				.Include(a => a.Department)
