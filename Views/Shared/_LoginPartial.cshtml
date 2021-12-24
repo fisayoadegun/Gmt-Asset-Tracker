@@ -4,12 +4,12 @@
 @inject UserManager<User> UserManager
 
 
-    <ul class="navbar-nav">
+    <ul class="navbar-nav flex-grow-1">
         @if (SignInManager.IsSignedIn(User))
         {
             <li class="nav-item">
-                <a class="nav-link text-dark" asp-controller="Home" asp-action="Index" 
-                   title="Welcome">Welcome @User.Identity.Name!</a>
+                <a class="nav-link text-dark" href="#"
+                   title="Welcome">Welcome @User.Identity.Name</a>
             </li>
             <li class="nav-item">
                 <form class="form-inline" asp-controller="Account" asp-action="Logout">
