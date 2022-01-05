@@ -15,8 +15,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <title>Asset Detail</title>
-    
-    
+
     <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,700" rel="stylesheet">
     <link href="~/css/detail.css" rel="stylesheet" />
@@ -102,6 +101,10 @@
                         <h5 class="sizes">
                             @Html.DisplayNameFor(model => model.Physical_check):
                             <span>@Html.DisplayFor(model => model.Physical_check.Check_name)</span>
+                        </h5>
+                        <h5 class="sizes">
+                            @Html.DisplayNameFor(model => model.Check_date):
+                            <span>@Html.DisplayFor(model => model.Check_date)</span>
                         </h5>
                     </div>
                 </div>

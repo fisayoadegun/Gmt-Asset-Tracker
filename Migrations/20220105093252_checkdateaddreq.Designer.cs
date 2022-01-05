@@ -4,14 +4,16 @@ using Gmt_Asset_Tracker.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Gmt_Asset_Tracker.Migrations
 {
     [DbContext(typeof(AssetTrackerContext))]
-    partial class AssetTrackerContextModelSnapshot : ModelSnapshot
+    [Migration("20220105093252_checkdateaddreq")]
+    partial class checkdateaddreq
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -48,7 +50,7 @@ namespace Gmt_Asset_Tracker.Migrations
                     b.Property<int?>("CheckId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime?>("Check_date")
+                    b.Property<DateTime>("Check_date")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime>("Delivery_date")

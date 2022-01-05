@@ -148,11 +148,20 @@
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="form-group">
+                                            <label asp-for="Check_date" class="control-label"></label>
+                                            <input asp-for="Check_date" class="form-control" />
+                                            <span asp-validation-for="Check_date" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
                                             <label asp-for="Present_user" class="control-label"></label>
                                             <input asp-for="Present_user" class="form-control" placeholder="Please enter the present user's name'" />
                                             <span asp-validation-for="Present_user" class="text-danger"></span>
                                         </div>
                                     </div>
+                                </div>
+                                <div class="row">
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label asp-for="Image" class="control-label">Current Image</label>
@@ -160,9 +169,7 @@
                                             <input asp-for="Image" class="form-control" />
                                         </div>
                                     </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-12">
+                                    <div class="col-md-6">
                                         <div class="form-group">
                                             <label asp-for="Image" class="control-label">New Asset Image</label>
                                             <input asp-for="ImageUpload" class="form-control" />

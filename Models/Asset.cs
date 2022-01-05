@@ -38,7 +38,6 @@ namespace Gmt_Asset_Tracker.Models
 		public int AssetStateId { get; set; }
 
 		[Display(Name = "Asset Tag")]
-		[Required]
 		public string Asset_tag { get; set; }
 
 		[Display(Name = "Service Tag")]
@@ -73,6 +72,9 @@ namespace Gmt_Asset_Tracker.Models
 		[Display(Name = "Physical Check")]
 		[Range(1, int.MaxValue, ErrorMessage = "You must choose a check state")]
 		public int? CheckId { get; set; }
+
+		[Display(Name = "Physical Check Date")]
+		public DateTime? Check_date { get; set; }
 
 		public string Image { get; set; }
 

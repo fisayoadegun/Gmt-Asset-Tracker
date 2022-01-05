@@ -16,6 +16,8 @@ using Microsoft.Extensions.Hosting;
 using System.Net;
 using System.Drawing.Printing;
 using Microsoft.AspNetCore.Authorization;
+using ClosedXML.Excel;
+using DocumentFormat.OpenXml.Wordprocessing;
 
 namespace Gmt_Asset_Tracker.Controllers
 {
@@ -365,6 +367,7 @@ namespace Gmt_Asset_Tracker.Controllers
 			entry.Property(p => p.CheckId).IsModified = true;
 			entry.Property(p => p.Image).IsModified = true;
 			entry.Property(p => p.Present_user).IsModified = true;
+			entry.Property(p => p.Check_date).IsModified = true;
 
 			//_context.Entry(asset).Property(u => u.PresentLocationId).IsModified = false;
 			//_context.Entry(asset).Property(u => u.CheckId).IsModified = false;
@@ -447,6 +450,150 @@ namespace Gmt_Asset_Tracker.Controllers
 		{
 			string path = _webHostEnvironment.WebRootPath + "\\media\\pdfs\\" + fileName;
 			return File(System.IO.File.ReadAllBytes(path), "application/pdf");
+		}
+
+		public IActionResult ExportToExcel()
+		{
+			using (var workbook = new XLWorkbook())
+			{
+				var assets = _context.Assets.Include(c => c.Category).Include(c => c.Location).Include(c => c.Department)
+					.Include(c => c.Asset_State).Include(c => c.Vendor).Include(c => c.Physical_check)
+					.ToList();
+				var worksheet = workbook.Worksheets.Add("Assets");
+				var currentRow = 1;
+				worksheet.Cell(currentRow, 1).Value = "Asset Name";
+				worksheet.Cell(currentRow, 2).Value = "Asset Description";
+				worksheet.Cell(currentRow, 3).Value = "Category";
+				worksheet.Cell(currentRow, 4).Value = "Location";
+				worksheet.Cell(currentRow, 5).Value = "Department";
+				worksheet.Cell(currentRow, 6).Value = "Asset State";
+				worksheet.Cell(currentRow, 7).Value = "Asset Tag";
+				worksheet.Cell(currentRow, 8).Value = "Service Tag";
+				worksheet.Cell(currentRow, 9).Value = "Assigned User";
+				worksheet.Cell(currentRow, 10).Value = "Purchased Price";
+				worksheet.Cell(currentRow, 11).Value = "Supplier";
+				worksheet.Cell(currentRow, 12).Value = "Delivery Date";
+				worksheet.Cell(currentRow, 13).Value = "Physical Check";
+				worksheet.Cell(currentRow, 14).Value = "Check Date";
+				worksheet.Cell(currentRow, 15).Value = "Present Location";
+				worksheet.Cell(currentRow, 16).Value = "Present User";
+				foreach (var user in assets)
+				{
+					currentRow++;
+					worksheet.Cell(currentRow, 1).Value = user.Asset_name;
+					worksheet.Cell(currentRow, 2).Value = user.Asset_description;
+					worksheet.Cell(currentRow, 3).Value = user.Category.Category_name;
+					worksheet.Cell(currentRow, 4).Value = user.Location.Location_name;
+					worksheet.Cell(currentRow, 5).Value = user.Department.Department_name;
+					worksheet.Cell(currentRow, 6).Value = user.Asset_State.Asset_state;
+					worksheet.Cell(currentRow, 7).Value = user.Asset_tag;
+					worksheet.Cell(currentRow, 8).Value = user.Service_tag;
+					worksheet.Cell(currentRow, 9).Value = user.Assigned_to;
+					worksheet.Cell(currentRow, 10).Value = user.Purchased_price;
+					worksheet.Cell(currentRow, 11).Value = user.Vendor.Vendor_name;
+					worksheet.Cell(currentRow, 12).Value = user.Delivery_date;
+					worksheet.Cell(currentRow, 13).Value = user.Physical_check.Check_name;
+					worksheet.Cell(currentRow, 14).Value = user.Check_date;
+					worksheet.Cell(currentRow, 15).Value = user.Present_location.Location_name;
+					worksheet.Cell(currentRow, 16).Value = user.Present_user;
+				}
+
+				using (var stream = new MemoryStream())
+				{
+					workbook.SaveAs(stream);
+					var content = stream.ToArray();
+
+					return File(
+						content,
+						"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+						"Assets.xlsx");
+				}
+			}
+		}
+
+		public ActionResult Filter(DateTime start, DateTime end)
+		{
+			var st = start;
+			var en = end;
+
+			var filterAsset = _context.Assets.Include(a => a.Asset_State)
+					.Include(a => a.Category)
+					.Include(a => a.Department)
+					.Include(a => a.Location)
+					.Include(a => a.Present_location)
+					.Include(a => a.Vendor)
+					.Include(a => a.Physical_check)
+					.Where(x => x.Delivery_date >= start && x.Delivery_date <= end).ToList();
+			ViewBag.START = st;
+			ViewBag.END = en;
+
+			//var filterTicket = _context.Assets
+			//.Where(x => x.Delivery_date >= start && x.Delivery_date <= end).ToList();
+			return View(filterAsset);
+		}
+
+		public IActionResult ExportToExcelfilter(DateTime start, DateTime end)
+		{
+			using (var workbook = new XLWorkbook())
+			{
+				var assets = _context.Assets.Include(c => c.Category).Include(c => c.Location).Include(c => c.Department)
+					.Include(c => c.Asset_State).Include(c => c.Vendor).Include(c => c.Physical_check).Where(x => x.Delivery_date >= start && x.Delivery_date <= end)
+					.ToList();
+
+				var st = start;
+				var en = end;
+				ViewBag.START = st;
+				ViewBag.END = en;
+				var worksheet = workbook.Worksheets.Add("Assets");
+				var currentRow = 1;
+				worksheet.Cell(currentRow, 1).Value = "Asset Name";
+				worksheet.Cell(currentRow, 2).Value = "Asset Description";
+				worksheet.Cell(currentRow, 3).Value = "Category";
+				worksheet.Cell(currentRow, 4).Value = "Location";
+				worksheet.Cell(currentRow, 5).Value = "Department";
+				worksheet.Cell(currentRow, 6).Value = "Asset State";
+				worksheet.Cell(currentRow, 7).Value = "Asset Tag";
+				worksheet.Cell(currentRow, 8).Value = "Service Tag";
+				worksheet.Cell(currentRow, 9).Value = "Assigned User";
+				worksheet.Cell(currentRow, 10).Value = "Purchased Price";
+				worksheet.Cell(currentRow, 11).Value = "Supplier";
+				worksheet.Cell(currentRow, 12).Value = "Delivery Date";
+				worksheet.Cell(currentRow, 13).Value = "Physical Check";
+				worksheet.Cell(currentRow, 14).Value = "Check Date";
+				worksheet.Cell(currentRow, 15).Value = "Present Location";
+				worksheet.Cell(currentRow, 16).Value = "Present User";
+				foreach (var user in assets)
+				{
+					currentRow++;
+					worksheet.Cell(currentRow, 1).Value = user.Asset_name;
+					worksheet.Cell(currentRow, 2).Value = user.Asset_description;
+					worksheet.Cell(currentRow, 3).Value = user.Category.Category_name;
+					worksheet.Cell(currentRow, 4).Value = user.Location.Location_name;
+					worksheet.Cell(currentRow, 5).Value = user.Department.Department_name;
+					worksheet.Cell(currentRow, 6).Value = user.Asset_State.Asset_state;
+					worksheet.Cell(currentRow, 7).Value = user.Asset_tag;
+					worksheet.Cell(currentRow, 8).Value = user.Service_tag;
+					worksheet.Cell(currentRow, 9).Value = user.Assigned_to;
+					worksheet.Cell(currentRow, 10).Value = user.Purchased_price;
+					worksheet.Cell(currentRow, 11).Value = user.Vendor.Vendor_name;
+					worksheet.Cell(currentRow, 12).Value = user.Delivery_date;
+					worksheet.Cell(currentRow, 13).Value = user.Physical_check.Check_name;
+					worksheet.Cell(currentRow, 14).Value = user.Check_date;
+					worksheet.Cell(currentRow, 15).Value = user.Present_location.Location_name;
+					worksheet.Cell(currentRow, 16).Value = user.Present_user;
+				}
+
+				using (var stream = new MemoryStream())
+				{
+					workbook.SaveAs(stream);
+					var content = stream.ToArray();
+
+					return File(
+						content,
+						"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+						"Assets.xlsx");
+				}
+			}
 		}
 	}
 }
