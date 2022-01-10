@@ -30,8 +30,15 @@
             -ms-transform: rotate(-44deg);
             transform: rotate(-44deg);
         }
-</style>
 
+    .form-inline {
+        display: flex;
+        flex-flow: row wrap;
+        align-items: center;
+    }
+</style>
+<br />
+<br />
 <div class="row mb-3">
     <div class="col-xl-3 col-lg-6">
         <div class="card card-inverse card-danger">
@@ -78,147 +85,128 @@
         </div>
     </div>
 </div>
-<h1>Asset List</h1>
 
-<p>
-    <a asp-action="Create">Add New Asset</a>
-</p>
-@*@using (Html.BeginForm("Filter", "Asset", FormMethod.Post))
-    {
-        <input type="datetime" name="start" id="start" />
-        <input type="datetime" name="end" id="end" />
-        <input type="submit" />
-    }*@
+<hr />
 
-<div class="column">
+<form class="form-inline" method="post" asp-controller="Asset" asp-action="ExportToExcelfilter">
+    <label class="control-label">Start Date</label>
+    <input type="datetime-local" value="2022-01-01T00:00" class="form-control" name="start" id="start" />
+    <label class="control-label">End Date</label>
+    <input type="datetime-local" value="2022-01-01T23:59" class="form-control" name="end" id="end" />
+    <input type="submit" value="Export to excel" asp-action="ExportToExcelfilter" asp-controller="Asset" class="btn btn-primary" />
+</form>
 
-    <input type="text" id="myInput" onkeyup="myFunction()" placeholder="Search.." title="Type in a name">
-    <button type="button" class="btn btn-primary">
-        <i class="fas fa-search"></i>
-    </button>
+<hr />
 
+<div class="row mb-3">
+    <div class="col-xl-3 col-lg-6">
+        <h1 class="btn btn-light" style="font-size:20px; width:270px;">Asset List</h1>
+    </div>
 
+    <div class="col-xl-3 col-lg-6">
+        <a asp-action="Create" class="btn btn-success">Add New Asset</a>
+    </div>
 
+    <div class="col-xl-3 col-lg-6">
+        <a asp-action="nullassettag" class="btn btn-success">Null Asset Tag</a>
+    </div>
 
-    <div style="float:right;">
-        <form method="post" asp-controller="Asset" asp-action="ExportToExcel">
-            <input type="submit" value="Export to excel" class="btn btn-primary" />
-        </form>
+    <div class="col-xl-3 col-lg-6">
+        @*<input type="text" id="myInput" onkeyup="myFunction()" placeholder="Search.." title="Type in a name">
+            <button type="button" class="btn btn-primary">
+                <i class="fas fa-search"></i>
+            </button>*@
     </div>
 </div>
 
 <hr />
 
-    <form method="post" asp-controller="Asset" asp-action="ExportToExcelfilter">
-        <div class="col-md-3">
-            <div class="form-group">
-                <label class="control-label"></label>
-                <input type="datetime-local" class="form-control" name="start" id="start" />
-                <span class="text-danger"></span>
-            </div>
-        </div>
-
-        <div class="col-md-3">
-            <div class="form-group">
-                <input type="datetime-local" class="form-control" name="end" id="end" />
-            </div>
-        </div>
-
-        <div class="col-md-6">
-            <input type="submit" value="Export to excel" asp-action="ExportToExcelfilter" asp-controller="Asset" class="btn btn-primary" />
-            @*<a href="@Url.Action("ExportToExcelfilter", "Asset",new {start = @ViewBag.START , end = @ViewBag.END })" class="btn btn-sm btn-info">Export</a>*@
-        </div>
-    </form>
-
-    
-                <hr />
-
-                <div style="width: 100%; overflow: auto;">
-                    <table class="table table-striped w-auto" id="myTable">
-                        <thead>
-                            <tr class="table-info">
-                                <th scope="row">
-                                    @Html.DisplayNameFor(model => model.Asset_name)
-                                </th>
-                                @*<th>
-                                        @Html.DisplayNameFor(model => model.Asset_description)
-                                    </th>*@
-                                <th scope="row">
-                                    @Html.DisplayNameFor(model => model.Asset_tag)
-                                </th>
-                                <th scope="row">
-                                    @Html.DisplayNameFor(model => model.Service_tag)
-                                </th>
-                                <th scope="row">
-                                    @Html.DisplayNameFor(model => model.Assigned_to)
-                                </th>
-                                @*<th>
-                                        @Html.DisplayNameFor(model => model.Purchased_price)
-                                    </th>*@
-                                <th scope="row">
-                                    @Html.DisplayNameFor(model => model.Delivery_date)
-                                </th>
-                                @*<th>
-                                        @Html.DisplayNameFor(model => model.Requistion_pack)
-                                    </th>*@
-                                @*<th>
-                                        @Html.DisplayNameFor(model => model.Image)
-                                    </th>*@
-                                <th scope="row">
-                                    @Html.DisplayNameFor(model => model.Present_user)
-                                </th>
-                                <th scope="row">
-                                    @Html.DisplayNameFor(model => model.Category)
-                                </th>
-                                <th scope="row">
-                                    @Html.DisplayNameFor(model => model.Location)
-                                </th>
-                                <th scope="row">
-                                    @Html.DisplayNameFor(model => model.Present_location)
-                                </th>
-                                <th scope="row">
-                                    @Html.DisplayNameFor(model => model.Department)
-                                </th>
-                                <th scope="row">
-                                    @Html.DisplayNameFor(model => model.Asset_State)
-                                </th>
-                                <th scope="row">
-                                    @Html.DisplayNameFor(model => model.Vendor)
-                                </th>
-                                <th scope="row">
-                                    @Html.DisplayNameFor(model => model.Physical_check)
-                                </th>
-                                <th></th>
-                                <th></th>
-                                <th></th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var item in Model)
-                            {
-                                <tr>
-                                    <td>
-                                        @Html.DisplayFor(modelItem => item.Asset_name)
-                                    </td>
-                                    @*<td>
-                                            @Html.DisplayFor(modelItem => item.Asset_description)
-                                        </td>*@
-                                    <td>
-                                        @Html.DisplayFor(modelItem => item.Asset_tag)
-                                    </td>
-                                    <td>
-                                        @Html.DisplayFor(modelItem => item.Service_tag)
-                                    </td>
-                                    <td>
-                                        @Html.DisplayFor(modelItem => item.Assigned_to)
-                                    </td>
-                                    @*<td>
-                                            @Html.DisplayFor(modelItem => item.Purchased_price)
-                                        </td>*@
-                                    <td>
-                                        @Html.DisplayFor(modelItem => item.Delivery_date)
-                                    </td>
+<div style="width: 100%; overflow: auto;">
+    <table class="table table-striped w-auto" id="table_id">
+        <thead>
+            <tr class="table-info">
+                <th scope="row">
+                    @Html.DisplayNameFor(model => model.Asset_name)
+                </th>
+                @*<th>
+                        @Html.DisplayNameFor(model => model.Asset_description)
+                    </th>*@
+                <th scope="row">
+                    @Html.DisplayNameFor(model => model.Asset_tag)
+                </th>
+                <th scope="row">
+                    @Html.DisplayNameFor(model => model.Service_tag)
+                </th>
+                <th scope="row">
+                    @Html.DisplayNameFor(model => model.Assigned_to)
+                </th>
+                @*<th>
+                        @Html.DisplayNameFor(model => model.Purchased_price)
+                    </th>*@
+                <th scope="row">
+                    @Html.DisplayNameFor(model => model.Delivery_date)
+                </th>
+                @*<th>
+                        @Html.DisplayNameFor(model => model.Requistion_pack)
+                    </th>*@
+                @*<th>
+                        @Html.DisplayNameFor(model => model.Image)
+                    </th>*@
+                <th scope="row">
+                    @Html.DisplayNameFor(model => model.Present_user)
+                </th>
+                <th scope="row">
+                    @Html.DisplayNameFor(model => model.Category)
+                </th>
+                <th scope="row">
+                    @Html.DisplayNameFor(model => model.Location)
+                </th>
+                <th scope="row">
+                    @Html.DisplayNameFor(model => model.Present_location)
+                </th>
+                <th scope="row">
+                    @Html.DisplayNameFor(model => model.Department)
+                </th>
+                <th scope="row">
+                    @Html.DisplayNameFor(model => model.Asset_State)
+                </th>
+                <th scope="row">
+                    @Html.DisplayNameFor(model => model.Vendor)
+                </th>
+                <th scope="row">
+                    @Html.DisplayNameFor(model => model.Physical_check)
+                </th>
+                <th>Actions</th>
+                <th></th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Asset_name)
+                    </td>
+                    @*<td>
+                            @Html.DisplayFor(modelItem => item.Asset_description)
+                        </td>*@
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Asset_tag)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Service_tag)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Assigned_to)
+                    </td>
+                    @*<td>
+                            @Html.DisplayFor(modelItem => item.Purchased_price)
+                        </td>*@
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Delivery_date)
+                    </td>
 
                     <!--<td>-->
                     @*@Html.DisplayFor(modelItem => item.Requistion_pack)*@
@@ -229,90 +217,49 @@
                     @*<td>
                         @Html.DisplayFor(modelItem => item.Image)
                         </td>*@
-                                    <td>
-                                        @Html.DisplayFor(modelItem => item.Present_user)
-                                    </td>
-                                    <td>
-                                        @Html.DisplayFor(modelItem => item.Category.Category_name)
-                                    </td>
-                                    <td>
-                                        @Html.DisplayFor(modelItem => item.Location.Location_name)
-                                    </td>
-                                    <td>
-                                        @Html.DisplayFor(modelItem => item.Present_location.Location_name)
-                                    </td>
-                                    <td>
-                                        @Html.DisplayFor(modelItem => item.Department.Department_name)
-                                    </td>
-                                    <td>
-                                        @Html.DisplayFor(modelItem => item.Asset_State.Asset_state)
-                                    </td>
-                                    <td>
-                                        @Html.DisplayFor(modelItem => item.Vendor.Vendor_name)
-                                    </td>
-                                    <td>
-                                        @Html.DisplayFor(modelItem => item.Physical_check.Check_name)
-                                    </td>
-                                    <td>
-                                        <a asp-action="AssetVerification" asp-route-id="@item.Id" class="fas fa-check-double btn btn-success btn-sm active">Asset Verification</a>
-                                    </td>
-                                    <td>
-                                        <a asp-action="Edit" asp-route-id="@item.Id" class="fas fa-edit btn btn-primary btn-sm active" role="button"></a>
-                                    </td>
-                                    <td>
-                                        <a asp-action="Details" asp-route-id="@item.Id" class="fas fa-info-circle btn btn-info btn-sm active" role="button"></a>
-                                    </td>
-                                    <td>
-                                        <a asp-action="Delete" asp-route-id="@item.Id" class="fas fa-trash btn btn-danger btn-sm active" role="button"></a>
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Present_user)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Category.Category_name)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Location.Location_name)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Present_location.Location_name)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Department.Department_name)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Asset_State.Asset_state)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Vendor.Vendor_name)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Physical_check.Check_name)
+                    </td>
+                    <td>
+                        <a asp-action="AssetVerification" asp-route-id="@item.Id" class="fas fa-check-double btn btn-success btn-sm active">Asset Verification</a>
+                    </td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="fas fa-edit btn btn-primary btn-sm active" role="button"></a>
+                    </td>
+                    <td>
+                        <a asp-action="Details" asp-route-id="@item.Id" class="fas fa-info-circle btn btn-info btn-sm active" role="button"></a>
+                    </td>
+                    <td>
+                        <a asp-action="Delete" asp-route-id="@item.Id" class="fas fa-trash btn btn-danger btn-sm active" role="button"></a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
 
-                <pagination page-count="@ViewBag.TotalPages" page-target="/asset" page-number="@ViewBag.PageNumber" page-range="@ViewBag.PageRange"></pagination>
+@*<pagination page-count="@ViewBag.TotalPages" page-target="/asset" page-number="@ViewBag.PageNumber" page-range="@ViewBag.PageRange"></pagination>*@
 
-                <script>
-                    function myFunction() {
-
-                        // Declare variables
-                        var input = document.getElementById("myInput");
-                        var filter = input.value.toUpperCase();
-                        var table = document.getElementById("myTable");
-                        var trs = table.tBodies[0].getElementsByTagName("tr");
-
-                        // Loop through first tbody's rows
-                        for (var i = 0; i < trs.length; i++) {
-
-                            // define the row's cells
-                            var tds = trs[i].getElementsByTagName("td");
-
-                            // hide the row
-                            trs[i].style.display = "none";
-
-                            // loop through row cells
-                            for (var i2 = 0; i2 < tds.length; i2++) {
-
-                                // if there's a match
-                                if (tds[i2].innerHTML.toUpperCase().indexOf(filter) > -1) {
-
-                                    // show the row
-                                    trs[i].style.display = "";
-
-                                    // skip to the next row
-                                    continue;
-
-                                }
-                            }
-                        }
-
-                    }
-
-                    $(document).ready(function () {
-                        $('#myTable').DataTable({
-                            "paging": false // false to disable pagination (or any other option)
-                        });
-                        $('.dataTables_length').addClass('bs-select');
-                    });
-                </script>
+<script>
+</script>

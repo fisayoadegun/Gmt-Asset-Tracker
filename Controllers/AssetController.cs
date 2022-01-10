@@ -18,6 +18,8 @@ using System.Drawing.Printing;
 using Microsoft.AspNetCore.Authorization;
 using ClosedXML.Excel;
 using DocumentFormat.OpenXml.Wordprocessing;
+using MimeKit;
+using MailKit.Net.Smtp;
 
 namespace Gmt_Asset_Tracker.Controllers
 {
@@ -34,9 +36,9 @@ namespace Gmt_Asset_Tracker.Controllers
 		}
 
 		// GET: Asset
-		public async Task<IActionResult> Index(int p = 1)
+		public async Task<IActionResult> Index()
 		{
-			int pagesize = 2;
+			//int pagesize = 2;
 			var assets = _context.Assets.Include(a => a.Asset_State)
 				.Include(a => a.Category)
 				.Include(a => a.Department)
@@ -44,21 +46,80 @@ namespace Gmt_Asset_Tracker.Controllers
 				.Include(a => a.Present_location)
 				.Include(a => a.Vendor)
 				.Include(a => a.Physical_check)
-				.OrderByDescending(p => p.Delivery_date)
-				.Skip((p - 1) * pagesize)
-				.Take(pagesize);
+				.OrderByDescending(p => p.Delivery_date);
+			//.Skip((p - 1) * pagesize)
+			//.Take(pagesize);
 
 			ViewData["Assets"] = _context.Assets.Count();
 			ViewData["Vendors"] = _context.Vendors.Count();
 			ViewData["Departments"] = _context.Departments.Count();
 			ViewData["Locations"] = _context.Locations.Count();
 
-			ViewBag.PageNumber = p;
-			ViewBag.PageRange = pagesize;
-			ViewBag.TotalPages = (int)Math.Ceiling((decimal)_context.Assets.Count() / pagesize);
+			//ViewBag.PageNumber = p;
+			//ViewBag.PageRange = pagesize;
+			//ViewBag.TotalPages = (int)Math.Ceiling((decimal)_context.Assets.Count() / pagesize);
 
 			//var assetTrackerContext = _context.Assets.Include(a => a.Asset_State).Include(a => a.Category).Include(a => a.Department).Include(a => a.Location).Include(a => a.Present_location).Include(a => a.Vendor);
 			return View(await assets.ToListAsync());
+		}
+
+		public async Task<IActionResult> nullassettag()
+		{
+			var assets = _context.Assets.Include(a => a.Asset_State)
+				.Include(a => a.Category)
+				.Include(a => a.Department)
+				.Include(a => a.Location)
+				.Include(a => a.Present_location)
+				.Include(a => a.Vendor)
+				.Include(a => a.Physical_check)
+				.OrderByDescending(p => p.Delivery_date).Where(x => x.Asset_tag == null);
+
+			return View(await assets.ToListAsync());
+		}
+
+		public async Task<IActionResult> Email()
+		{
+			var assets = _context.Assets.Include(a => a.Asset_State)
+				.Include(a => a.Category)
+				.Include(a => a.Department)
+				.Include(a => a.Location)
+				.Include(a => a.Present_location)
+				.Include(a => a.Vendor)
+				.Include(a => a.Physical_check)
+				.OrderByDescending(p => p.Delivery_date).Where(x => x.Asset_tag == null);
+
+			//ViewData["url"] = url;
+
+			//var message = new MimeMessage();
+			//message.From.Add(new MailboxAddress("GMT Vendor Evaluation", "Auto.Mail@gmt-limited.com"));
+			//message.To.Add(new MailboxAddress(departmentinfo.email));
+			//message.Subject = "GMT Vendor Evaluation Evaluation";
+			//message.Body = new BodyBuilder { HtmlBody = string.Format("<h3 style='color:black;'>Click on the link below to Evaluate this Product/Service({0}) delivered to your Department <hr /> {1}</h3>", productname, url) }.ToMessageBody();
+
+			//using (var client = new SmtpClient())
+			//{
+			//    client.Connect("smtp.office365.com", 587, false);
+			//    client.Authenticate("Auto.Mail@gmt-limited.com", "Hav!34iT");
+
+			//    client.Send(message);
+			//    client.Disconnect(true);
+			//}
+
+			var message = new MimeMessage();
+			message.From.Add(new MailboxAddress("GMT Vendor Evaluation", "fisayo.adegun@gmt-limited.com"));
+			message.To.Add(new MailboxAddress("i_zzyfizzy@live.com"));
+			message.Subject = "GMT Vendor Evaluation Evaluation";
+			message.Body = new BodyBuilder { HtmlBody = string.Format("<h3 style='color:black;'>Click on the link below to Evaluate this Product/Service({0}) delivered to your Department <hr /> {1}</h3>") }.ToMessageBody();
+
+			using (var client = new SmtpClient())
+			{
+				client.Connect("smtp.office365.com", 587, false);
+				client.Authenticate("fisayo.adegun@gmt-limited.com", "Surulere007");
+
+				client.Send(message);
+				client.Disconnect(true);
+			}
+			return View();
 		}
 
 		// GET: Asset/Details/5
@@ -109,7 +170,7 @@ namespace Gmt_Asset_Tracker.Controllers
 			if (ModelState.IsValid)
 			{
 				var assettag = await _context.Assets.FirstOrDefaultAsync(x => x.Asset_tag == asset.Asset_tag);
-				if (assettag != null)
+				if (assettag != null && asset.Asset_tag != null)
 				{
 					ModelState.AddModelError("", "An asset with this asset tag already exists.");
 					return View(asset);
@@ -196,7 +257,7 @@ namespace Gmt_Asset_Tracker.Controllers
 			if (ModelState.IsValid)
 			{
 				var assettag = await _context.Assets.Where(x => x.Id != id).FirstOrDefaultAsync(x => x.Asset_tag == asset.Asset_tag);
-				if (assettag != null)
+				if (assettag != null && asset.Asset_tag != null)
 				{
 					ModelState.AddModelError("", "An asset with this asset tag already exists.");
 					return View(asset);
@@ -311,7 +372,7 @@ namespace Gmt_Asset_Tracker.Controllers
 			ViewBag.CategoryId = new SelectList(_context.Categories, "Id", "Category_name", asset.CategoryId);
 
 			var assettag = await _context.Assets.Where(x => x.Id != id).FirstOrDefaultAsync(x => x.Asset_tag == asset.Asset_tag);
-			if (assettag != null)
+			if (assettag != null && asset.Asset_tag != null)
 			{
 				ModelState.AddModelError("", "An asset with this asset tag already exists.");
 				return View(asset);
@@ -577,9 +638,27 @@ namespace Gmt_Asset_Tracker.Controllers
 					worksheet.Cell(currentRow, 10).Value = user.Purchased_price;
 					worksheet.Cell(currentRow, 11).Value = user.Vendor.Vendor_name;
 					worksheet.Cell(currentRow, 12).Value = user.Delivery_date;
-					worksheet.Cell(currentRow, 13).Value = user.Physical_check.Check_name;
+					//worksheet.Cell(currentRow, 13).Value = user.Physical_check.Check_name;
+					//worksheet.Cell(currentRow, 15).Value = user.Present_location.Location_name;
+					if (user.Physical_check == null)
+					{
+						worksheet.Cell(currentRow, 13).Value = "";
+					}
+					else
+					{
+						worksheet.Cell(currentRow, 13).Value = user.Physical_check.Check_name;
+					}
+
 					worksheet.Cell(currentRow, 14).Value = user.Check_date;
-					worksheet.Cell(currentRow, 15).Value = user.Present_location.Location_name;
+					if (user.Present_location == null)
+					{
+						worksheet.Cell(currentRow, 15).Value = "";
+					}
+					else
+					{
+						worksheet.Cell(currentRow, 15).Value = user.Present_location.Location_name;
+					}
+
 					worksheet.Cell(currentRow, 16).Value = user.Present_user;
 				}
 

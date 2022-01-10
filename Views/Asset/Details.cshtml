@@ -3,23 +3,21 @@
 @{
     ViewData["Title"] = "Details";
 }
-<link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
-<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
-<script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
+
 <!------ Include the above in your HEAD tag ---------->
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="font-family: sans-serif; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%">
+
 <head>
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <title>Asset Detail</title>
 
-    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/site.css" />
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,700" rel="stylesheet">
     <link href="~/css/detail.css" rel="stylesheet" />
-    <link href="~/css/site.css" rel="stylesheet" />
 </head>
 
 <body>
@@ -37,32 +35,32 @@
                             <li class="active"><a data-target="#pic-1" data-toggle="tab"><img src="~/media/images/@Model.Image" /></a></li>
                         </ul>
                     </div>
-                    <div class="details col-md-6">
-                        <h3 class="product-title">@Html.DisplayFor(model => model.Asset_name)</h3>
-                        <p class="product-description">@Html.DisplayFor(model => model.Asset_description)</p>
+                    <div class="details col-md-6" style="font-size:10px; ">
+                        <h3 class="product-title"  style="font-size: 1.5em; font-family: sans-serif">@Html.DisplayFor(model => model.Asset_name)</h3>
+                        <p class="product-description" style="font-size:1.5em; font-family:sans-serif">@Html.DisplayFor(model => model.Asset_description)</p>
                         <h4 class="price"><span></span></h4>
                         <p class="vote"><strong></strong><strong></strong></p>
-                        <h5 class="sizes">
+                        <h5 class="sizes" style="font-size: 1.5em; font-family: sans-serif">
                             @Html.DisplayNameFor(model => model.Asset_tag):
                             <span>@Html.DisplayFor(model => model.Asset_tag)</span>
                         </h5>
-                        <h5 class="sizes">
+                        <h5 class="sizes" style="font-size: 1.5em; font-family: sans-serif">
                             @Html.DisplayNameFor(model => model.Service_tag):
                             <span>@Html.DisplayFor(model => model.Service_tag)</span>
                         </h5>
-                        <h5 class="sizes">
+                        <h5 class="sizes" style="font-size: 1.5em; font-family: sans-serif">
                             @Html.DisplayNameFor(model => model.Assigned_to):
                             <span>@Html.DisplayFor(model => model.Assigned_to)</span>
                         </h5>
-                        <h5 class="sizes">
+                        <h5 class="sizes" style="font-size: 1.5em; font-family: sans-serif">
                             @Html.DisplayNameFor(model => model.Purchased_price):
                             <span> &#x20A6;@Html.DisplayFor(model => model.Purchased_price)</span>
                         </h5>
-                        <h5 class="sizes">
+                        <h5 class="sizes" style="font-size: 1.5em; font-family: sans-serif">
                             @Html.DisplayNameFor(model => model.Delivery_date):
                             <span>@Html.DisplayFor(model => model.Delivery_date)</span>
                         </h5>
-                        <h5 class="sizes">
+                        <h5 class="sizes" style="font-size: 1.5em; font-family: sans-serif">
                             @Html.DisplayNameFor(model => model.Requistion_pack):
                             <span>
                                 <a href="~/Asset/PDFViewerNewTab?fileName=@Model.Requistion_pack" target="_blank">
@@ -70,39 +68,39 @@
                                 </a>
                             </span>
                         </h5>
-                        <h5 class="sizes">
+                        <h5 class="sizes" style="font-size: 1.5em; font-family: sans-serif">
                             @Html.DisplayNameFor(model => model.Present_user):
                             <span>@Html.DisplayFor(model => model.Present_user)</span>
                         </h5>
-                        <h5 class="sizes">
+                        <h5 class="sizes" style="font-size: 1.5em; font-family: sans-serif">
                             @Html.DisplayNameFor(model => model.Category):
                             <span>@Html.DisplayFor(model => model.Category.Category_name)</span>
                         </h5>
-                        <h5 class="sizes">
+                        <h5 class="sizes" style="font-size: 1.5em; font-family: sans-serif">
                             @Html.DisplayNameFor(model => model.Location):
                             <span>@Html.DisplayFor(model => model.Location.Location_name)</span>
                         </h5>
-                        <h5 class="sizes">
+                        <h5 class="sizes" style="font-size: 1.5em; font-family: sans-serif">
                             @Html.DisplayNameFor(model => model.Present_location):
                             <span>@Html.DisplayFor(model => model.Present_location.Location_name)</span>
                         </h5>
-                        <h5 class="sizes">
+                        <h5 class="sizes" style="font-size: 1.5em; font-family: sans-serif">
                             @Html.DisplayNameFor(model => model.Department):
                             <span>@Html.DisplayFor(model => model.Department.Department_name)</span>
                         </h5>
-                        <h5 class="sizes">
+                        <h5 class="sizes" style="font-size: 1.5em; font-family: sans-serif">
                             @Html.DisplayNameFor(model => model.Asset_State):
                             <span>@Html.DisplayFor(model => model.Asset_State.Asset_state)</span>
                         </h5>
-                        <h5 class="sizes">
+                        <h5 class="sizes" style="font-size:1.5em; font-family:sans-serif">
                             @Html.DisplayNameFor(model => model.Vendor):
                             <span>@Html.DisplayFor(model => model.Vendor.Vendor_name)</span>
                         </h5>
-                        <h5 class="sizes">
+                        <h5 class="sizes" style="font-size:1.5em; font-family:sans-serif">
                             @Html.DisplayNameFor(model => model.Physical_check):
                             <span>@Html.DisplayFor(model => model.Physical_check.Check_name)</span>
                         </h5>
-                        <h5 class="sizes">
+                        <h5 class="sizes" style="font-size:1.5em; font-family:sans-serif">
                             @Html.DisplayNameFor(model => model.Check_date):
                             <span>@Html.DisplayFor(model => model.Check_date)</span>
                         </h5>
@@ -117,6 +115,10 @@
     </div>
 </body>
 </html>
+<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+<script src="~/lib/bootstrap/dist/js/bootstrap.min.js"></script>
+
+<script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
 
 <!--<h1>Details</h1>
 

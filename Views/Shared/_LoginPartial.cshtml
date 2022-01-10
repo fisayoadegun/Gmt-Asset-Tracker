@@ -4,11 +4,11 @@
 @inject UserManager<User> UserManager
 
 
-    <ul class="navbar-nav flex-grow-1">
+    <ul class="navbar-nav flex-grow-1" style="float:right;">
         @if (SignInManager.IsSignedIn(User))
         {
             <li class="nav-item">
-                <a class="nav-link text-dark" href="#"
+                <a class="nav-link " href="#"
                    title="Welcome">Welcome @User.Identity.Name</a>
             </li>
             <li class="nav-item">
@@ -20,11 +20,11 @@
         else
         {
             <li class="nav-item">
-                <a class="nav-link text-dark" asp-controller="Account"
+                <a class="nav-link " asp-controller="Account"
                    asp-action="Login">Login</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link text-dark" asp-controller="Account"
+                <a class="nav-link" asp-controller="Account"
                    asp-action="Register">Register</a>
             </li>
         }

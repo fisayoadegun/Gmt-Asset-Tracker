@@ -23,7 +23,7 @@
                     </ul>
                 </div>
                 <div class="navbar-collapse collapse d-sm-inline-flex flex-sm-row-reverse">
-                    <ul class="navbar-nav flex-grow-1">
+                    <ul class="navbar-nav flex-grow-1" style="float:right;">
                         <li>
                             <partial name="_LoginPartial" />
                         </li>
@@ -43,9 +43,12 @@
 
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; 2021 - GMT Asset Tracker
+            <span id="current-year"></span> - GMT Asset Tracker
         </div>
     </footer>
+    <script>
+        document.getElementById("current-year").innerHTML = new Date().getFullYear();
+    </script>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
