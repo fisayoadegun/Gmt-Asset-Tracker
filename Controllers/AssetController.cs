@@ -18,8 +18,12 @@ using System.Drawing.Printing;
 using Microsoft.AspNetCore.Authorization;
 using ClosedXML.Excel;
 using DocumentFormat.OpenXml.Wordprocessing;
+
+//using System.Net.Mail;
 using MimeKit;
 using MailKit.Net.Smtp;
+using DocumentFormat.OpenXml.Bibliography;
+using System.Security.Policy;
 
 namespace Gmt_Asset_Tracker.Controllers
 {
@@ -77,7 +81,7 @@ namespace Gmt_Asset_Tracker.Controllers
 			return View(await assets.ToListAsync());
 		}
 
-		public async Task<IActionResult> Email()
+		public IActionResult Email()
 		{
 			var assets = _context.Assets.Include(a => a.Asset_State)
 				.Include(a => a.Category)
@@ -105,20 +109,20 @@ namespace Gmt_Asset_Tracker.Controllers
 			//    client.Disconnect(true);
 			//}
 
-			var message = new MimeMessage();
-			message.From.Add(new MailboxAddress("GMT Vendor Evaluation", "fisayo.adegun@gmt-limited.com"));
-			message.To.Add(new MailboxAddress("i_zzyfizzy@live.com"));
-			message.Subject = "GMT Vendor Evaluation Evaluation";
-			message.Body = new BodyBuilder { HtmlBody = string.Format("<h3 style='color:black;'>Click on the link below to Evaluate this Product/Service({0}) delivered to your Department <hr /> {1}</h3>") }.ToMessageBody();
+			//var message = new MimeMessage();
+			//message.From.Add(new MailboxAddress("GMT Vendor Evaluation", "fisayo.adegun@gmt-limited.com"));
+			//message.To.Add(new MailboxAddress("i_zzyfizzy@live.com"));
+			//message.Subject = "GMT Vendor Evaluation Evaluation";
+			//message.Body = new BodyBuilder { HtmlBody = string.Format("<h3 style='color:black;'>Click on the link below to Evaluate this Product/Service({0}) delivered to your Department <hr /> {1}</h3>") }.ToMessageBody();
 
-			using (var client = new SmtpClient())
-			{
-				client.Connect("smtp.office365.com", 587, false);
-				client.Authenticate("fisayo.adegun@gmt-limited.com", "Surulere007");
+			//using (var client = new SmtpClient())
+			//{
+			//	client.Connect("smtp.office365.com", 587, false);
+			//	client.Authenticate("fisayo.adegun@gmt-limited.com", "Surulere007");
 
-				client.Send(message);
-				client.Disconnect(true);
-			}
+			//	client.Send(message);
+			//	client.Disconnect(true);
+			//}
 			return View();
 		}
 
@@ -591,6 +595,79 @@ namespace Gmt_Asset_Tracker.Controllers
 			//var filterTicket = _context.Assets
 			//.Where(x => x.Delivery_date >= start && x.Delivery_date <= end).ToList();
 			return View(filterAsset);
+		}
+
+		public IActionResult EmailExport()
+		{
+			byte[] bytes = null;
+			using (var workbook = new XLWorkbook())
+			{
+				var assets = _context.Assets.Include(a => a.Asset_State)
+				.Include(a => a.Category)
+				.Include(a => a.Department)
+				.Include(a => a.Location)
+				.Include(a => a.Present_location)
+				.Include(a => a.Vendor)
+				.Include(a => a.Physical_check)
+				.OrderByDescending(p => p.Delivery_date).Where(x => x.Asset_tag == null).ToList();
+
+				var worksheet = workbook.Worksheets.Add("Assets");
+				var currentRow = 1;
+				worksheet.Cell(currentRow, 1).Value = "Asset Name";
+				worksheet.Cell(currentRow, 2).Value = "Category";
+				worksheet.Cell(currentRow, 3).Value = "Location";
+				worksheet.Cell(currentRow, 4).Value = "Department";
+				worksheet.Cell(currentRow, 5).Value = "Asset State";
+				worksheet.Cell(currentRow, 6).Value = "Asset Tag";
+				worksheet.Cell(currentRow, 7).Value = "Service Tag";
+				worksheet.Cell(currentRow, 8).Value = "Assigned User";
+				worksheet.Cell(currentRow, 9).Value = "Purchased Price";
+				worksheet.Cell(currentRow, 10).Value = "Supplier";
+				worksheet.Cell(currentRow, 11).Value = "Delivery Date";
+				foreach (var user in assets)
+				{
+					currentRow++;
+					worksheet.Cell(currentRow, 1).Value = user.Asset_name;
+					worksheet.Cell(currentRow, 2).Value = user.Category.Category_name;
+					worksheet.Cell(currentRow, 3).Value = user.Location.Location_name;
+					worksheet.Cell(currentRow, 4).Value = user.Department.Department_name;
+					worksheet.Cell(currentRow, 5).Value = user.Asset_State.Asset_state;
+					worksheet.Cell(currentRow, 6).Value = user.Asset_tag;
+					worksheet.Cell(currentRow, 7).Value = user.Service_tag;
+					worksheet.Cell(currentRow, 8).Value = user.Assigned_to;
+					worksheet.Cell(currentRow, 9).Value = user.Purchased_price;
+					worksheet.Cell(currentRow, 10).Value = user.Vendor.Vendor_name;
+					worksheet.Cell(currentRow, 11).Value = user.Delivery_date;
+				}
+
+				using (var stream = new MemoryStream())
+				{
+					workbook.SaveAs(stream);
+					bytes = stream.ToArray();
+					var message = new MimeMessage();
+					message.From.Add(new MailboxAddress("GMT Asset Tracker", "i_zzyfizzy@live.com"));
+					message.To.Add(new MailboxAddress("fisayoadegun@gmail.com"));
+					message.Subject = "Assets with no asset tag";
+					
+
+					var builder = new BodyBuilder();
+					builder.HtmlBody = string.Format("<h3 style='color:black;'>Kindly find attached an excel sheet of assets without asset tags. <hr /></h3>");
+					//message.Body = new BodyBuilder { HtmlBody = string.Format("<h3 style='color:black;'>Kindly find attached an excel sheet of assets without asset tags. <hr /></h3>") }.ToMessageBody();
+					//Attach Attachment to Email
+					builder.Attachments.Add("Assets_With_No_Assettag.xlsx", bytes);
+					message.Body = builder.ToMessageBody();
+
+					using (var client = new SmtpClient())
+					{
+						client.Connect("smtp.office365.com", 587, false);
+						client.Authenticate("i_zzyfizzy@live.com", "Surulere007");
+
+						client.Send(message);
+						client.Disconnect(true);
+					}
+					return View();
+				}
+			}
 		}
 
 		public IActionResult ExportToExcelfilter(DateTime start, DateTime end)

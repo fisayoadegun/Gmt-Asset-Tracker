@@ -1,0 +1,31 @@
+using GMT.Logistics.Data.DataTableGenerator;
+
+namespace GMTLogistics.Prolog.TerminalManagement.ManagementViews.DebitNote
+{
+    public class InvoiceExportData
+    {
+        [CustomColumnName("S. No.")] public string SerialNumber { get; set; }
+        [CustomColumnName("Container No.")] public string ContainerNumber { get; set; }
+        [CustomColumnName("Size")] public string Size { get; set; }
+        [CustomColumnName("Gate In")] public string GateIn { get; set; }
+        [CustomColumnName("Gate Out")] public string GateOut { get; set; }
+        [CustomColumnName("DN Type")] public string DnType { get; set; }
+        [CustomColumnName("DN Number")] public string DebitNoteNumber { get; set; }
+        [CustomColumnName("DN Date")] public string DateCreated { get; set; }
+        [CustomColumnName("Rating Date")] public string RatingDate { get; set; }
+        [CustomColumnName("Rating Days Excluding Free Days")] public string StorageDays { get; set; }
+        [CustomColumnName("Rating Tier 1")] public string Tier1Days { get; set; }
+        [CustomColumnName("Rating Tier 2")] public string Tier2Days { get; set; }
+        [CustomColumnName("Rating Tier 3")] public string Tier3Days { get; set; }
+        [CustomColumnName("Storage Tier 1")] public string Tier1Storage { get; set; }
+        [CustomColumnName("Storage Tier 2")] public string Tier2Storage { get; set; }
+        [CustomColumnName("Storage Tier 3")] public string Tier3Storage { get; set; }
+        [CustomColumnName("Total Storage")] public string TotalStorage { get; set; }
+        [CustomColumnName("Storage Discount")] public string StorageDiscount { get; set; }
+        [CustomColumnName("Applicable Storage")] public string ApplicableStorage { get; set; }
+        [CustomColumnName("THC")] public string TerminalHandling { get; set; }
+        [CustomColumnName("Lift On")] public string LiftOn { get; set; }
+        [CustomColumnName("Service Charge")] public string ServiceCharge { get; set; }
+        [CustomColumnName("Total Revenue")] public string TotalRevenue { get; set; }
+    }
+}

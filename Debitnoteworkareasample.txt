@@ -1,0 +1,206 @@
+using GMT.Common.DTOs.Manifest;
+using GMT.Logistics.Common.Extensions;
+using GMT.Logistics.Data.DataTableGenerator;
+using GMTLogistics.Prolog.Infrastructure.Events.Errors;
+using GMTLogistics.Prolog.Infrastructure.Extensions;
+using GMTLogistics.Prolog.Infrastructure.PropertyChangeNotification;
+using GMTLogistics.Prolog.Infrastructure.Services.APICommon;
+using GMTLogistics.Prolog.Infrastructure.Tools.ExcelReader;
+using GMTLogistics.Prolog.Infrastructure.Windows;
+using GMTLogistics.Prolog.TerminalManagement.Events;
+using GMTLogistics.Prolog.TerminalManagement.ManagementViews.DebitNote.DebitNoteViews;
+using GMTLogistics.Prolog.TerminalManagement.TerminalManagementTypes;
+using Microsoft.Win32;
+using System;
+using System.IO;
+using System.Linq;
+using System.Windows;
+using System.Windows.Data;
+using Unity;
+using DelegateCommand = Prism.Commands.DelegateCommand;
+
+namespace GMTLogistics.Prolog.TerminalManagement.ManagementViews.DebitNote
+{
+    public class DebitNoteWorkAreaViewModel : TerminalManagementViewModelBase
+    {
+        private readonly IExcelReaderService _excelReader;
+        private readonly DebitNoteEntity _entity;
+
+        public DebitNoteWorkAreaViewModel(IUnityContainer container, IExcelReaderService excelReader) :
+            base(container, TerminalManagementNames.DebitNote.ToString())
+        {
+            _excelReader = excelReader;
+            Entity = new DynamicNotifyPropertyChangedProxy(new DebitNoteEntity());
+            _entity = Entity.GetDto<DebitNoteEntity>();
+
+            EventAggregator.GetEvent<ClosePaneEvent<DebitNoteViewModel>>().Subscribe(OnCloseDebitNotePane);
+
+            OpenCommand = new DelegateCommand(OpenExecute);
+            RefreshCommand = new DelegateCommand(RefreshExecute);
+            ExportToExcelCommand = new DelegateCommand(ExportToExcelExecute, CanExportToExcel);
+
+            IsInvoiceReportVisible = ApiSession.HasRole("Invoice_Read");
+        }
+
+        public DelegateCommand ExportToExcelCommand { get; set; }
+
+        private void OpenExecute()
+        {
+            if (SelectedManifest == null) return;
+            var debitNoteView = Container.Resolve<DebitNoteView>();
+            var viewModel = debitNoteView.GetViewModel().As<DebitNoteViewModel>();
+            viewModel.SetDefaultView(debitNoteView);
+
+            OpenItemExecute(SelectedManifest.Id, debitNoteView, SelectedManifest.BolNumber);
+        }
+
+        private void RefreshExecute()
+        {
+            EventAggregator.GetEvent<RefreshItemListEvent>()
+                .Publish(new RefreshItemListEventPayload(this, "Generate Invoice"));
+        }
+
+        private async void ExportToExcelExecute()
+        {
+            if (ToDate < FromDate)
+            {
+                EventAggregator.GetEvent<ErrorEvent>()
+                    .Publish(new ErrorEventPayload("Invalid Dates"));
+                return;
+            }
+
+            if (ToDate != null)
+                ToDate = new DateTime(ToDate.Value.Year, ToDate.Value.Month, ToDate.Value.Day, 23, 59, 59);
+            Methods["DebitNoteReportGetRecList"].MethodParameter = FromDate?.ToString("s") + "," + ToDate?.ToString("s");
+            await GetRecordAsync("DebitNoteReportGetRecList");
+
+            IsBusy = true;
+            try
+            {
+                var saveFileDialog = new SaveFileDialog { Title = "Export to Excel" };
+                var result = saveFileDialog.ShowDialog();
+
+                if (result != true) return;
+                var fileInfo = new FileInfo(saveFileDialog.FileName);
+                var targetDirectory = fileInfo.DirectoryName;
+                var providedFileName = fileInfo.Name;
+                var filename = $"{targetDirectory}\\{providedFileName}.xlsx";
+
+                var dataTable = ObjectToDataTable.ConvertObjectToDataTable(_entity.ReportData);
+                _excelReader.Export(dataTable, filename);
+
+                var alertWindow = Container.Resolve<SuccessAlertWindow>();
+                var viewModel = alertWindow.GetViewModel().As<SuccessAlertWindowViewModel>();
+                viewModel.Content = "Invoice Report";
+                viewModel.BoldContent = "Data Exported";
+
+                alertWindow.Owner = Application.Current.MainWindow;
+                alertWindow.ShowDialog();
+            }
+            catch (Exception e)
+            {
+                EventAggregator.GetEvent<ErrorEvent>().Publish(new ErrorEventPayload(e.Message));
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
+
+        private bool CanExportToExcel()
+        {
+            return FromDate != null && ToDate != null;
+        }
+
+        private void OnCloseDebitNotePane(ClosePanePayload obj)
+        {
+            var viewModel = obj.View.As<DebitNoteView>().GetViewModel<DebitNoteViewModel>();
+            var entity = viewModel.Entity.GetDto<DebitNoteEntity>();
+            if (entity.IsNew)
+                RemovePane(obj.View);
+            RefreshExecute();
+        }
+
+        public override void CreateFilters()
+        {
+            var view = new CollectionViewSource { Source = EntityListItems };
+            CollectionView = view;
+
+            SelectedManifest = null;
+        }
+
+        public ManifestListItem SelectedManifest
+        {
+            get { return GetValue(() => SelectedManifest); }
+            set { SetValue(() => SelectedManifest, value); }
+        }
+
+        public string SearchForBolNumber
+        {
+            get { return GetValue(() => SearchForBolNumber); }
+            set
+            {
+                SetValue(() => SearchForBolNumber, value, () =>
+                {
+                    if (value == null) return;
+                    var view = CollectionView == null
+                        ? CollectionViewSource.GetDefaultView(EntityListItems)
+                        : CollectionView.View;
+
+                    view.Filter = obj =>
+                    {
+                        if (obj == null) return false;
+                        return obj.As<ManifestListItem>().BolNumber.IndexOf(value, StringComparison.OrdinalIgnoreCase) > -1;
+                    };
+                });
+            }
+        }
+
+        public string SearchForInvoiceNumber
+        {
+            get { return GetValue(() => SearchForInvoiceNumber); }
+            set
+            {
+                SetValue(() => SearchForInvoiceNumber, value, () =>
+                {
+                    if (value == null) return;
+                    var view = CollectionView == null
+                        ? CollectionViewSource.GetDefaultView(EntityListItems)
+                        : CollectionView.View;
+
+                    view.Filter = obj =>
+                    {
+                        return obj != null && obj.As<ManifestListItem>().DebitNoteNumbers.Any(x =>
+                                   x.IndexOf(value, StringComparison.OrdinalIgnoreCase) > -1);
+                    };
+                });
+            }
+        }
+
+        public bool IsInvoiceReportVisible
+        {
+            get { return GetValue(() => IsInvoiceReportVisible); }
+            set { SetValue(() => IsInvoiceReportVisible, value); }
+        }
+
+        public DateTime? FromDate
+        {
+            get { return GetValue(() => FromDate); }
+            set
+            {
+                SetValue(() => FromDate, value);
+                ExportToExcelCommand.RaiseCanExecuteChanged();
+            }
+        }
+
+        public DateTime? ToDate
+        {
+            get { return GetValue(() => ToDate); }
+            set
+            {
+                SetValue(() => ToDate, value);
+                ExportToExcelCommand.RaiseCanExecuteChanged();
+            }
+        }
+    }
+}

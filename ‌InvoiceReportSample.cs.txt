@@ -1,0 +1,574 @@
+using GMT.Common.Aggregates.Bonded;
+using GMTLogistics.Prolog.Infrastructure.MethodCalls;
+using GMTLogistics.Prolog.Infrastructure.Modules;
+using GMTLogistics.Prolog.Infrastructure.PropertyChangeNotification;
+using GMTLogistics.Prolog.Infrastructure.Services.APICommon;
+using GMTLogistics.Prolog.Infrastructure.Services.Endpoint;
+using GMTLogistics.Prolog.TerminalManagement.TerminalManagementTypes;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace GMTLogistics.Prolog.TerminalManagement.ManagementViews.DebitNote.Methods
+{
+    public class InvoiceReportGetRecList : GmtGetMethodCallBase
+    {
+        public InvoiceReportGetRecList(IGmtDataService dataService) : base(dataService)
+        {
+        }
+
+        public override string MethodName => "DebitNoteReportGetRecList";
+        public override GmtModules ModuleName => GmtModules.TerminalManagement;
+        public override string Category => TerminalManagementNames.DebitNote.ToString();
+        public override bool RunAtStartup => false;
+
+        public override bool UseDefaultParameter => false;
+        public override ApiControllers Controller => ApiControllers.DebitNote;
+
+        public override async Task RunAsync(DynamicNotifyPropertyChangedProxy entity)
+        {
+            var parameter = MethodParameter.Split(',');
+            var bondedAggregates = await GetRecordsAsync<BondedAggregate>(MethodName, new[] { parameter[0], parameter[1] });
+            var aggregates = bondedAggregates.ToList();
+
+            var childInvoices = aggregates.Where(x => x.DebitNoteDto.ParentId != 0).ToList();
+            if (childInvoices.Any())
+                childInvoices.ForEach(x => aggregates.Remove(x));
+
+            var serial = 1;
+            var reportData = new List<InvoiceExportData>();
+            aggregates.ForEach(debitNote =>
+            {
+                var first = true;
+                decimal discountValue = 0;
+
+                debitNote.Containers.ToList().ForEach(cont =>
+                {
+                    var detail = debitNote.DebitNoteDetails.FirstOrDefault(dbDetail =>
+                        dbDetail.DebitNoteContainerDetailDto.ContainerId == cont.ContainerId);
+                    if (detail == null) return;
+
+                    detail.DebitNoteRateDetails.ToList().ForEach(dbrDetail =>
+                    {
+                        var rateDetail = debitNote.RateDetails.FirstOrDefault(rDetail =>
+                            rDetail.RateDetailId == dbrDetail.RateDetailId);
+                        if (rateDetail == null) return;
+
+                        dbrDetail.Name = rateDetail.Name;
+                        dbrDetail.Rate = rateDetail.Value;
+                    });
+
+                    var gateOut = debitNote.GateOutDetails
+                        .FirstOrDefault(gDetail => gDetail.ContainerId == cont.ContainerId);
+                    var gateOutDate = gateOut?.Date;
+
+                    var storageDays = (detail.Tier1Days ?? 0) + (detail.Tier2Days ?? 0) + (detail.Tier3Days ?? 0);
+                    var totalStorage = (detail.Tier1Storage ?? 0) + (detail.Tier2Storage ?? 0) +
+                                       (detail.Tier3Storage ?? 0);
+                    var percentageDiscount = totalStorage * (debitNote.DebitNoteDto.DiscountPercentage / 100);
+                    var specificDiscount = debitNote.DebitNoteDto.SpecifiedDiscountAmount;
+
+                    decimal totalDiscount;
+                    if (specificDiscount != 0 && first)
+                    {
+                        var tier1Tax = debitNote.DebitNoteChargesSummary
+                            .FirstOrDefault(x => x.Description == "Tier 1 Storage")?.Tax;
+                        var tier2Tax = debitNote.DebitNoteChargesSummary
+                            .FirstOrDefault(x => x.Description == "Tier 2 Storage")?.Tax;
+                        var tier3Tax = debitNote.DebitNoteChargesSummary
+                            .FirstOrDefault(x => x.Description == "Tier 3 Storage")?.Tax;
+
+                        var totalStorageTax = Convert.ToDecimal(tier1Tax?.Trim(',')) +
+                                              Convert.ToDecimal(tier2Tax?.Trim(',')) +
+                                              Convert.ToDecimal(tier3Tax?.Trim(','));
+                        specificDiscount -= totalStorageTax;
+
+                        var remainder = specificDiscount % debitNote.DebitNoteDto.NoOfContainers;
+                        discountValue = specificDiscount / debitNote.DebitNoteDto.NoOfContainers;
+                        discountValue = Math.Truncate(discountValue);
+
+                        totalDiscount = percentageDiscount + discountValue + remainder;
+                        first = false;
+                    }
+                    else
+                        totalDiscount = percentageDiscount + discountValue;
+
+                    var terminalHandling = detail.DebitNoteRateDetails.FirstOrDefault(chSummary =>
+                        chSummary.Name.Contains("Terminal Handling"));
+                    var liftOn = detail.DebitNoteRateDetails.FirstOrDefault(chSummary =>
+                        chSummary.Name == "Lift On");
+                    var service = detail.DebitNoteRateDetails.FirstOrDefault(chSummary =>
+                        chSummary.Name == "Service / Delivery");
+                    var revenue = totalStorage - totalDiscount
+                                  + (terminalHandling?.Rate ?? 0)
+                                  + (liftOn?.Rate ?? 0)
+                                  + (service?.Rate ?? 0);
+
+                    reportData.Add(new InvoiceExportData
+                    {
+                        SerialNumber = serial.ToString(),
+                        ContainerNumber = cont.ContainerNumber,
+                        Size = cont.Size,
+                        GateIn = detail.GateInDate == null
+                            ? "-"
+                            : detail.GateInDate.Value.ToString("dd/MMM/yyyy"),
+                        GateOut = gateOutDate == null
+                            ? "-"
+                            : gateOutDate.Value.ToString("dd/MMM/yyyy"),
+                        DnType = "Initial",
+                        DebitNoteNumber = debitNote.DebitNoteDto.DebitNoteNumber,
+                        DateCreated = debitNote.DebitNoteDto.Date == null
+                            ? ""
+                            : debitNote.DebitNoteDto.Date.Value.ToString("dd/MMM/yyyy"),
+                        RatingDate = debitNote.DebitNoteDto.ExpirationDate == null
+                            ? ""
+                            : debitNote.DebitNoteDto.ExpirationDate.Value.ToString("dd/MMM/yyyy"),
+                        StorageDays = storageDays == 0 ? "-" : $"{storageDays}",
+                        Tier1Days = detail.Tier1Days == null ||
+                                    detail.Tier1Days == 0
+                            ? "-"
+                            : $"{detail.Tier1Days}",
+                        Tier2Days = detail.Tier2Days == null ||
+                                    detail.Tier2Days == 0
+                            ? "-"
+                            : $"{detail.Tier2Days}",
+                        Tier3Days = detail.Tier3Days == null ||
+                                    detail.Tier3Days == 0
+                            ? "-"
+                            : $"{detail.Tier3Days}",
+                        Tier1Storage = detail.Tier1Storage == null ||
+                                       detail.Tier1Storage == 0
+                            ? "-"
+                            : $"{detail.Tier1Storage:n2}",
+                        Tier2Storage = detail.Tier2Storage == null ||
+                                       detail.Tier2Storage == 0
+                            ? "-"
+                            : $"{detail.Tier2Storage:n2}",
+                        Tier3Storage = detail.Tier3Storage == null ||
+                                       detail.Tier3Storage == 0
+                            ? "-"
+                            : $"{detail.Tier3Storage:n2}",
+                        TotalStorage = totalStorage == 0 ? "-" : $"{totalStorage:n2}",
+                        StorageDiscount = totalDiscount == 0 ? "-" : $"{totalDiscount:n2}",
+                        ApplicableStorage = totalStorage - totalDiscount == 0
+                            ? "-"
+                            : $"{totalStorage - totalDiscount:n2}",
+                        TerminalHandling = terminalHandling == null ? "-" : $"{terminalHandling.Rate:n2}",
+                        LiftOn = liftOn == null ? "-" : $"{liftOn.Rate:n2}",
+                        ServiceCharge = service == null ? "-" : $"{service.Rate:n2}",
+                        TotalRevenue = revenue == 0 ? "-" : $"{revenue:n2}"
+                    });
+
+                    serial += 1;
+                });
+
+                var children = childInvoices.Where(x => x.DebitNoteDto.ParentId == debitNote.DebitNoteDto.DebitNoteId)
+                    .OrderBy(x => x.DebitNoteDto.Date)
+                    .ToList();
+
+                if (children.Any())
+                {
+                    children.ForEach(x => childInvoices.Remove(x));
+
+                    decimal childTier1Days;
+                    decimal childTier1Storage;
+                    decimal childTier2Days;
+                    decimal childTier2Storage;
+                    decimal childTier3Days;
+                    decimal childTier3Storage;
+
+                    first = true;
+                    discountValue = 0;
+                    children.ForEach(child =>
+                    {
+                        child.Containers.ToList().ForEach(cont =>
+                        {
+                            var gateOut = child.GateOutDetails
+                                .FirstOrDefault(gDetail => gDetail.ContainerId == cont.ContainerId);
+                            var gateOutDate = gateOut?.Date;
+
+                            var detail = child.DebitNoteDetails.FirstOrDefault(dbDetail =>
+                                dbDetail.DebitNoteContainerDetailDto.ContainerId == cont.ContainerId);
+                            if (detail == null) return;
+
+                            detail.DebitNoteRateDetails.ToList().ForEach(dbrDetail =>
+                            {
+                                var rateDetail = child.RateDetails.FirstOrDefault(rDetail =>
+                                    rDetail.RateDetailId == dbrDetail.RateDetailId);
+                                if (rateDetail == null) return;
+
+                                dbrDetail.Name = rateDetail.Name;
+                                dbrDetail.Rate = rateDetail.Value;
+                            });
+
+                            var parentData = reportData.Where(x => x.ContainerNumber == cont.ContainerNumber).ToList();
+
+                            childTier1Days = (detail.Tier1Days ?? 0) - parentData.Sum(x =>
+                                                 Convert.ToDecimal(string.IsNullOrEmpty(x.Tier1Days.Trim('-'))
+                                                     ? "0"
+                                                     : x.Tier1Days));
+                            childTier1Storage = (detail.Tier1Storage ?? 0) - parentData.Sum(x =>
+                                                    Convert.ToDecimal(string.IsNullOrEmpty(x.Tier1Storage.Trim('-'))
+                                                        ? "0"
+                                                        : x.Tier1Storage));
+                            childTier2Days = (detail.Tier2Days ?? 0) - parentData.Sum(x =>
+                                                 Convert.ToDecimal(string.IsNullOrEmpty(x.Tier2Days.Trim('-'))
+                                                     ? "0"
+                                                     : x.Tier2Days));
+                            childTier2Storage = (detail.Tier2Storage ?? 0) - parentData.Sum(x =>
+                                                    Convert.ToDecimal(string.IsNullOrEmpty(x.Tier2Storage.Trim('-'))
+                                                        ? "0"
+                                                        : x.Tier2Storage));
+                            childTier3Days = (detail.Tier3Days ?? 0) - parentData.Sum(x =>
+                                                 Convert.ToDecimal(string.IsNullOrEmpty(x.Tier3Days.Trim('-'))
+                                                     ? "0"
+                                                     : x.Tier3Days));
+                            childTier3Storage = (detail.Tier3Storage ?? 0) - parentData.Sum(x =>
+                                                    Convert.ToDecimal(string.IsNullOrEmpty(x.Tier3Storage.Trim('-'))
+                                                        ? "0"
+                                                        : x.Tier3Storage));
+                            var storageDays = childTier1Days + childTier2Days + childTier3Days;
+                            var totalStorage = childTier1Storage + childTier2Storage + childTier3Storage;
+                            var parentDiscount = parentData.Sum(x =>
+                                Convert.ToDecimal(string.IsNullOrEmpty(x.StorageDiscount.Trim('-', ','))
+                                    ? "0"
+                                    : x.StorageDiscount));
+                            var storageDiscount = child.DebitNoteDto.DiscountedAmount - parentDiscount;
+                            decimal totalDiscount;
+                            if (storageDiscount > 0 && first)
+                            {
+                                var remainder = storageDiscount % child.DebitNoteDto.NoOfContainers;
+                                discountValue = storageDiscount / child.DebitNoteDto.NoOfContainers;
+                                discountValue = Math.Truncate(discountValue);
+
+                                totalDiscount = discountValue + remainder;
+                                first = false;
+                            }
+                            else
+                                totalDiscount = discountValue;
+
+                            reportData.Add(new InvoiceExportData
+                            {
+                                SerialNumber = serial.ToString(),
+                                ContainerNumber = cont.ContainerNumber,
+                                Size = cont.Size,
+                                GateIn = detail.GateInDate == null
+                                    ? "-"
+                                    : detail.GateInDate.Value.ToString("dd/MMM/yyyy"),
+                                GateOut = gateOutDate == null
+                                    ? "-"
+                                    : gateOutDate.Value.ToString("dd/MMM/yyyy"),
+                                DnType = "Additional",
+                                DebitNoteNumber = child.DebitNoteDto.DebitNoteNumber,
+                                DateCreated = child.DebitNoteDto.Date == null
+                                    ? ""
+                                    : child.DebitNoteDto.Date.Value.ToString("dd/MMM/yyyy"),
+                                RatingDate = child.DebitNoteDto.ExpirationDate == null
+                                    ? ""
+                                    : child.DebitNoteDto.ExpirationDate.Value.ToString("dd/MMM/yyyy"),
+                                StorageDays = storageDays == 0 ? "-" : $"{storageDays}",
+                                Tier1Days = childTier1Days == 0 ? "-" : $"{childTier1Days}",
+                                Tier2Days = childTier2Days == 0 ? "-" : $"{childTier2Days}",
+                                Tier3Days = childTier3Days == 0 ? "-" : $"{childTier3Days}",
+                                Tier1Storage = childTier1Storage == 0 ? "-" : $"{childTier1Storage:n2}",
+                                Tier2Storage = childTier2Storage == 0 ? "-" : $"{childTier2Storage:n2}",
+                                Tier3Storage = childTier3Storage == 0 ? "-" : $"{childTier3Storage:n2}",
+                                TotalStorage = totalStorage == 0 ? "-" : $"{totalStorage:n2}",
+                                StorageDiscount = totalDiscount == 0 ? "-" : $"{totalDiscount:n2}",
+                                ApplicableStorage = totalStorage - totalDiscount == 0
+                                    ? "-"
+                                    : $"{totalStorage - totalDiscount:n2}",
+                                TerminalHandling = "-",
+                                LiftOn = "-",
+                                ServiceCharge = "-",
+                                TotalRevenue = totalStorage - totalDiscount == 0
+                                    ? "-"
+                                    : $"{totalStorage - totalDiscount:n2}"
+                            });
+
+                            serial += 1;
+                        });
+                    });
+                }
+            });
+
+            if (childInvoices.Any())
+            {
+                foreach (var child in childInvoices)
+                {
+                    var result = await GetRecordsAsync<BondedAggregate>("DebitNoteGetRec", new[] { $"{child.ManifestDto.ContainerSourceId}" });
+                    aggregates = result.ToList();
+
+                    var manifest = aggregates.FirstOrDefault();
+                    if (manifest != null)
+                        aggregates.Remove(manifest);
+
+                    var extraData = new List<InvoiceExportData>();
+                    var parent = aggregates.FirstOrDefault(x => x.DebitNoteDto.DebitNoteId == child.DebitNoteDto.ParentId);
+                    if (parent != null)
+                    {
+                        var first = true;
+                        decimal discountValue = 0;
+
+                        parent.Containers.ToList().ForEach(cont =>
+                        {
+                            var detail = parent.DebitNoteDetails.FirstOrDefault(dbDetail =>
+                                dbDetail.DebitNoteContainerDetailDto.ContainerId == cont.ContainerId);
+                            if (detail == null) return;
+
+                            detail.DebitNoteRateDetails.ToList().ForEach(dbrDetail =>
+                            {
+                                var rateDetail = parent.RateDetails.FirstOrDefault(rDetail =>
+                                    rDetail.RateDetailId == dbrDetail.RateDetailId);
+                                if (rateDetail == null) return;
+
+                                dbrDetail.Name = rateDetail.Name;
+                                dbrDetail.Rate = rateDetail.Value;
+                            });
+
+                            var gateOut = parent.GateOutDetails
+                                .FirstOrDefault(gDetail => gDetail.ContainerId == cont.ContainerId);
+                            var gateOutDate = gateOut?.Date;
+
+                            var storageDays = (detail.Tier1Days ?? 0) + (detail.Tier2Days ?? 0) +
+                                              (detail.Tier3Days ?? 0);
+                            var totalStorage = (detail.Tier1Storage ?? 0) + (detail.Tier2Storage ?? 0) +
+                                               (detail.Tier3Storage ?? 0);
+                            var percentageDiscount = totalStorage * (parent.DebitNoteDto.DiscountPercentage / 100);
+                            var specificDiscount = parent.DebitNoteDto.SpecifiedDiscountAmount;
+
+                            decimal totalDiscount;
+                            if (specificDiscount != 0 && first)
+                            {
+                                var tier1Tax = parent.DebitNoteChargesSummary
+                                    .FirstOrDefault(x => x.Description == "Tier 1 Storage")?.Tax;
+                                var tier2Tax = parent.DebitNoteChargesSummary
+                                    .FirstOrDefault(x => x.Description == "Tier 2 Storage")?.Tax;
+                                var tier3Tax = parent.DebitNoteChargesSummary
+                                    .FirstOrDefault(x => x.Description == "Tier 3 Storage")?.Tax;
+
+                                var totalStorageTax = Convert.ToDecimal(tier1Tax?.Trim(',')) +
+                                                      Convert.ToDecimal(tier2Tax?.Trim(',')) +
+                                                      Convert.ToDecimal(tier3Tax?.Trim(','));
+                                specificDiscount -= totalStorageTax;
+
+                                var remainder = specificDiscount % parent.DebitNoteDto.NoOfContainers;
+                                discountValue = specificDiscount / parent.DebitNoteDto.NoOfContainers;
+                                discountValue = Math.Truncate(discountValue);
+
+                                totalDiscount = percentageDiscount + discountValue + remainder;
+                                first = false;
+                            }
+                            else
+                                totalDiscount = percentageDiscount + discountValue;
+
+                            var terminalHandling = detail.DebitNoteRateDetails.FirstOrDefault(chSummary =>
+                                chSummary.Name.Contains("Terminal Handling"));
+                            var liftOn = detail.DebitNoteRateDetails.FirstOrDefault(chSummary =>
+                                chSummary.Name == "Lift On");
+                            var service = detail.DebitNoteRateDetails.FirstOrDefault(chSummary =>
+                                chSummary.Name == "Service / Delivery");
+                            var revenue = totalStorage - totalDiscount
+                                          + (terminalHandling?.Rate ?? 0)
+                                          + (liftOn?.Rate ?? 0)
+                                          + (service?.Rate ?? 0);
+
+                            extraData.Add(new InvoiceExportData
+                            {
+                                SerialNumber = serial.ToString(),
+                                ContainerNumber = cont.ContainerNumber,
+                                Size = cont.Size,
+                                GateIn = detail.GateInDate == null
+                                    ? "-"
+                                    : detail.GateInDate.Value.ToString("dd/MMM/yyyy"),
+                                GateOut = gateOutDate == null
+                                    ? "-"
+                                    : gateOutDate.Value.ToString("dd/MMM/yyyy"),
+                                DnType = "Initial",
+                                DebitNoteNumber = parent.DebitNoteDto.DebitNoteNumber,
+                                DateCreated = parent.DebitNoteDto.Date == null
+                                    ? ""
+                                    : parent.DebitNoteDto.Date.Value.ToString("dd/MMM/yyyy"),
+                                RatingDate = parent.DebitNoteDto.ExpirationDate == null
+                                    ? ""
+                                    : parent.DebitNoteDto.ExpirationDate.Value.ToString("dd/MMM/yyyy"),
+                                StorageDays = storageDays == 0 ? "-" : $"{storageDays}",
+                                Tier1Days = detail.Tier1Days == null ||
+                                            detail.Tier1Days == 0
+                                    ? "-"
+                                    : $"{detail.Tier1Days}",
+                                Tier2Days = detail.Tier2Days == null ||
+                                            detail.Tier2Days == 0
+                                    ? "-"
+                                    : $"{detail.Tier2Days}",
+                                Tier3Days = detail.Tier3Days == null ||
+                                            detail.Tier3Days == 0
+                                    ? "-"
+                                    : $"{detail.Tier3Days}",
+                                Tier1Storage = detail.Tier1Storage == null ||
+                                               detail.Tier1Storage == 0
+                                    ? "-"
+                                    : $"{detail.Tier1Storage:n2}",
+                                Tier2Storage = detail.Tier2Storage == null ||
+                                               detail.Tier2Storage == 0
+                                    ? "-"
+                                    : $"{detail.Tier2Storage:n2}",
+                                Tier3Storage = detail.Tier3Storage == null ||
+                                               detail.Tier3Storage == 0
+                                    ? "-"
+                                    : $"{detail.Tier3Storage:n2}",
+                                TotalStorage = totalStorage == 0 ? "-" : $"{totalStorage:n2}",
+                                StorageDiscount = totalDiscount == 0 ? "-" : $"{totalDiscount:n2}",
+                                ApplicableStorage = totalStorage - totalDiscount == 0
+                                    ? "-"
+                                    : $"{totalStorage - totalDiscount:n2}",
+                                TerminalHandling = terminalHandling == null ? "-" : $"{terminalHandling.Rate:n2}",
+                                LiftOn = liftOn == null ? "-" : $"{liftOn.Rate:n2}",
+                                ServiceCharge = service == null ? "-" : $"{service.Rate:n2}",
+                                TotalRevenue = revenue == 0 ? "-" : $"{revenue:n2}"
+                            });
+                        });
+
+                        var extraChildInvoices = aggregates
+                                .Where(x => x.DebitNoteDto.ParentId == parent.DebitNoteDto.DebitNoteId)
+                                .OrderBy(x => x.DebitNoteDto.Date)
+                                .ToList();
+                        if (extraChildInvoices.Any())
+                        {
+                            decimal childTier1Days;
+                            decimal childTier1Storage;
+                            decimal childTier2Days;
+                            decimal childTier2Storage;
+                            decimal childTier3Days;
+                            decimal childTier3Storage;
+
+                            first = true;
+                            discountValue = 0;
+                            extraChildInvoices.ForEach(extraChild =>
+                            {
+                                extraChild.Containers.ToList().ForEach(cont =>
+                                {
+                                    var gateOut = extraChild.GateOutDetails
+                                        .FirstOrDefault(gDetail => gDetail.ContainerId == cont.ContainerId);
+                                    var gateOutDate = gateOut?.Date;
+
+                                    var detail = extraChild.DebitNoteDetails.FirstOrDefault(dbDetail =>
+                                        dbDetail.DebitNoteContainerDetailDto.ContainerId == cont.ContainerId);
+                                    if (detail == null) return;
+
+                                    detail.DebitNoteRateDetails.ToList().ForEach(dbrDetail =>
+                                    {
+                                        var rateDetail = extraChild.RateDetails.FirstOrDefault(rDetail =>
+                                            rDetail.RateDetailId == dbrDetail.RateDetailId);
+                                        if (rateDetail == null) return;
+
+                                        dbrDetail.Name = rateDetail.Name;
+                                        dbrDetail.Rate = rateDetail.Value;
+                                    });
+
+                                    var parentData = extraData.Where(x => x.ContainerNumber == cont.ContainerNumber).ToList();
+
+                                    childTier1Days = (detail.Tier1Days ?? 0) - parentData.Sum(x =>
+                                                         Convert.ToDecimal(string.IsNullOrEmpty(x.Tier1Days.Trim('-'))
+                                                             ? "0"
+                                                             : x.Tier1Days));
+                                    childTier1Storage = (detail.Tier1Storage ?? 0) - parentData.Sum(x =>
+                                                            Convert.ToDecimal(string.IsNullOrEmpty(x.Tier1Storage.Trim('-'))
+                                                                ? "0"
+                                                                : x.Tier1Storage));
+                                    childTier2Days = (detail.Tier2Days ?? 0) - parentData.Sum(x =>
+                                                         Convert.ToDecimal(string.IsNullOrEmpty(x.Tier2Days.Trim('-'))
+                                                             ? "0"
+                                                             : x.Tier2Days));
+                                    childTier2Storage = (detail.Tier2Storage ?? 0) - parentData.Sum(x =>
+                                                            Convert.ToDecimal(string.IsNullOrEmpty(x.Tier2Storage.Trim('-'))
+                                                                ? "0"
+                                                                : x.Tier2Storage));
+                                    childTier3Days = (detail.Tier3Days ?? 0) - parentData.Sum(x =>
+                                                         Convert.ToDecimal(string.IsNullOrEmpty(x.Tier3Days.Trim('-'))
+                                                             ? "0"
+                                                             : x.Tier3Days));
+                                    childTier3Storage = (detail.Tier3Storage ?? 0) - parentData.Sum(x =>
+                                                            Convert.ToDecimal(string.IsNullOrEmpty(x.Tier3Storage.Trim('-'))
+                                                                ? "0"
+                                                                : x.Tier3Storage));
+                                    var storageDays = childTier1Days + childTier2Days + childTier3Days;
+                                    var totalStorage = childTier1Storage + childTier2Storage + childTier3Storage;
+                                    var parentDiscount = parentData.Sum(x =>
+                                        Convert.ToDecimal(string.IsNullOrEmpty(x.StorageDiscount.Trim('-', ','))
+                                            ? "0"
+                                            : x.StorageDiscount));
+                                    var storageDiscount = extraChild.DebitNoteDto.DiscountedAmount - parentDiscount;
+                                    decimal totalDiscount;
+                                    if (storageDiscount > 0 && first)
+                                    {
+                                        var remainder = storageDiscount % extraChild.DebitNoteDto.NoOfContainers;
+                                        discountValue = storageDiscount / extraChild.DebitNoteDto.NoOfContainers;
+                                        discountValue = Math.Truncate(discountValue);
+
+                                        totalDiscount = discountValue + remainder;
+                                        first = false;
+                                    }
+                                    else
+                                        totalDiscount = discountValue;
+
+                                    extraData.Add(new InvoiceExportData
+                                    {
+                                        SerialNumber = serial.ToString(),
+                                        ContainerNumber = cont.ContainerNumber,
+                                        Size = cont.Size,
+                                        GateIn = detail.GateInDate == null
+                                            ? "-"
+                                            : detail.GateInDate.Value.ToString("dd/MMM/yyyy"),
+                                        GateOut = gateOutDate == null
+                                            ? "-"
+                                            : gateOutDate.Value.ToString("dd/MMM/yyyy"),
+                                        DnType = "Additional",
+                                        DebitNoteNumber = extraChild.DebitNoteDto.DebitNoteNumber,
+                                        DateCreated = extraChild.DebitNoteDto.Date == null
+                                            ? ""
+                                            : extraChild.DebitNoteDto.Date.Value.ToString("dd/MMM/yyyy"),
+                                        RatingDate = extraChild.DebitNoteDto.ExpirationDate == null
+                                            ? ""
+                                            : extraChild.DebitNoteDto.ExpirationDate.Value.ToString("dd/MMM/yyyy"),
+                                        StorageDays = storageDays == 0 ? "-" : $"{storageDays}",
+                                        Tier1Days = childTier1Days == 0 ? "-" : $"{childTier1Days}",
+                                        Tier2Days = childTier2Days == 0 ? "-" : $"{childTier2Days}",
+                                        Tier3Days = childTier3Days == 0 ? "-" : $"{childTier3Days}",
+                                        Tier1Storage = childTier1Storage == 0 ? "-" : $"{childTier1Storage:n2}",
+                                        Tier2Storage = childTier2Storage == 0 ? "-" : $"{childTier2Storage:n2}",
+                                        Tier3Storage = childTier3Storage == 0 ? "-" : $"{childTier3Storage:n2}",
+                                        TotalStorage = totalStorage == 0 ? "-" : $"{totalStorage:n2}",
+                                        StorageDiscount = totalDiscount == 0 ? "-" : $"{totalDiscount:n2}",
+                                        ApplicableStorage = totalStorage - totalDiscount == 0
+                                            ? "-"
+                                            : $"{totalStorage - totalDiscount:n2}",
+                                        TerminalHandling = "-",
+                                        LiftOn = "-",
+                                        ServiceCharge = "-",
+                                        TotalRevenue = totalStorage - totalDiscount == 0
+                                            ? "-"
+                                            : $"{totalStorage - totalDiscount:n2}"
+                                    });
+                                });
+                            });
+                        }
+                    }
+
+                    var childData = extraData.Where(x => x.DebitNoteNumber == child.DebitNoteDto.DebitNoteNumber).ToList();
+                    if (childData.Any())
+                        childData.ForEach(x =>
+                        {
+                            x.SerialNumber = serial.ToString();
+                            reportData.Add(x);
+                            serial += 1;
+                        });
+                }
+            }
+
+            entity.SetProperty("ReportData", new ObservableCollection<InvoiceExportData>(reportData));
+        }
+    }
+}

@@ -112,6 +112,12 @@
     </div>
 
     <div class="col-xl-3 col-lg-6">
+        <form class="form-inline" method="post" asp-controller="Asset" asp-action="EmailExport">
+            <input type="submit" value="Send Email" asp-action="EmailExport" asp-controller="Asset" class="btn btn-primary" />
+        </form>
+    </div>
+
+    <div class="col-xl-3 col-lg-6">
         @*<input type="text" id="myInput" onkeyup="myFunction()" placeholder="Search.." title="Type in a name">
             <button type="button" class="btn btn-primary">
                 <i class="fas fa-search"></i>
